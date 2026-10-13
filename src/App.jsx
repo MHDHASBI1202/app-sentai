@@ -893,6 +893,7 @@ function App() {
 
   const activeHeroes = heroes.slice(0, characterCount)
   const device = DEVICES[deviceIndex]
+  const resolvedShout = shoutMode === 'custom' ? (customShout.trim() || 'Henshin!') : shoutPreset
   const sharedSuitSystem = TEAM_SUIT_SYSTEMS.find(([label]) => label === teamSuitSystem)?.[1] ?? TEAM_SUIT_SYSTEMS[0][1]
   const sharedAccentFinish = TEAM_ACCENT_FINISHES.find(([label]) => label === teamAccentFinish)?.[1] ?? TEAM_ACCENT_FINISHES[0][1]
   const teamMotif = activeHeroes[0]?.motif || 'Mythical beast'
