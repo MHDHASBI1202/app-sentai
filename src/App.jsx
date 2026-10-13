@@ -413,6 +413,20 @@ const DEVICES = [
   ['Peluit morpher', 'blown once, creating a sharp visible soundwave and transformation flash'],
 ]
 
+const SHOUT_PRESETS = [
+  'Rawr!',
+  'Henshin!',
+  'Change, Soul On!',
+  'Chou Shinsei!',
+  'Kourin!',
+  'Bakuhatsu!',
+  'Beast On!',
+  'Power Up!',
+  'Suit Up!',
+  'Awaken!',
+  'Tanpa teriakan (Hening)',
+]
+
 const MOTIFS = {
   'Mythical beast': ['Phoenix', 'Kitsune', 'Dragon', 'Griffin', 'Kirin', 'Hydra', 'Pegasus', 'Basilisk', 'Thunderbird', 'Chimera'],
   Dinosaur: ['Tyrannosaurus Rex', 'Triceratops', 'Pteranodon', 'Velociraptor', 'Ankylosaurus', 'Stegosaurus', 'Spinosaurus', 'Brachiosaurus', 'Pachycephalosaurus', 'Carnotaurus'],
@@ -861,6 +875,9 @@ function App() {
   const [aesthetic, setAesthetic] = useState(AESTHETICS[0])
   const [location, setLocation] = useState(LOCATIONS[1])
   const [deviceIndex, setDeviceIndex] = useState(0)
+  const [shoutMode, setShoutMode] = useState('preset')
+  const [shoutPreset, setShoutPreset] = useState(SHOUT_PRESETS[0])
+  const [customShout, setCustomShout] = useState('')
   const [teamNameMode, setTeamNameMode] = useState('preset')
   const [teamName, setTeamName] = useState(TEAM_NAME_PRESETS[0])
   const [teamSuitSystem, setTeamSuitSystem] = useState(TEAM_SUIT_SYSTEMS[0][0])
@@ -1001,7 +1018,7 @@ function App() {
       id: `storyboard-henshin-${h.id}`,
       kind: 'IMAGE • STORYBOARD 3:2',
       title: `${String(i + 1).padStart(2, '0')} · ${h.name} — Solo Henshin Storyboard`,
-      text: `${storyboardLayout} Solo henshin storyboard for ${heroDescriptor(h)}. Panel 1 (medium shot, waist-up): civilian form in ${civilianOutfitDetail(h)}, standing alert. Panel 2 (close-up, chest-to-face): ${device[0].toLowerCase()} activation — ${device[1]}. Panel 3 (full body, low angle): ${AURAS[h.aura][2]} wraps around the civilian body. Panel 4 (full body, front): spandex suit materializes over the body. Panel 5 (extreme close-up, helmet only): helmet locks into place, visor glows. Panel 6 (full body, dramatic low angle): completed hero pose. ${location}; ${aesthetic}. Use identical camera angles and panel composition for every hero. ${realism}. Aspect ratio 3:2.`,
+      text: `${storyboardLayout} Solo henshin storyboard for ${heroDescriptor(h)}. Panel 1 (medium shot, waist-up): civilian form in ${civilianOutfitDetail(h)}, standing alert. Panel 2 (close-up, chest-to-face): ${resolvedShout === 'Tanpa teriakan (Hening)' ? '' : `shouting "${resolvedShout}", `}${device[0].toLowerCase()} activation — ${device[1]}. Panel 3 (full body, low angle): ${AURAS[h.aura][2]} wraps around the civilian body. Panel 4 (full body, front): spandex suit materializes over the body. Panel 5 (extreme close-up, helmet only): helmet locks into place, visor glows. Panel 6 (full body, dramatic low angle): completed hero pose. ${location}; ${aesthetic}. Use identical camera angles and panel composition for every hero. ${realism}. Aspect ratio 3:2.`,
     })
     const soloFinisherStoryboard = (h, i) => ({
       id: `storyboard-finisher-${h.id}`,
@@ -1012,7 +1029,7 @@ function App() {
     const storyboardItems = mode === 'Henshin'
       ? sequence === 'Solo'
         ? activeHeroes.map(soloHenshinStoryboard)
-        : [{ id: 'storyboard-henshin-team', kind: 'IMAGE • STORYBOARD 3:2', title: 'Team Henshin Storyboard', text: `${storyboardLayout} Team henshin storyboard, ${activeHeroes.length} tokusatsu heroes. Panel 1 (wide shot): civilian group formation at ${location}. Panel 2 (medium group shot): synchronized ${device[0].toLowerCase()} activation. Panel 3 (wide shot): ${group} — energy envelops each hero. Panel 4 (wide shot): suits materialize simultaneously. Panel 5 (close-up montage): helmets lock on each hero in sequence. Panel 6 (wide shot, low angle): full team landing pose. ${aesthetic}. ${realism}. Aspect ratio 3:2.` }]
+        : [{ id: 'storyboard-henshin-team', kind: 'IMAGE • STORYBOARD 3:2', title: 'Team Henshin Storyboard', text: `${storyboardLayout} Team henshin storyboard, ${activeHeroes.length} tokusatsu heroes. Panel 1 (wide shot): civilian group formation at ${location}. Panel 2 (medium group shot): synchronized ${device[0].toLowerCase()} activation${resolvedShout === 'Tanpa teriakan (Hening)' ? '' : ` with unified "${resolvedShout}" shout`}. Panel 3 (wide shot): ${group} — energy envelops each hero. Panel 4 (wide shot): suits materialize simultaneously. Panel 5 (close-up montage): helmets lock on each hero in sequence. Panel 6 (wide shot, low angle): full team landing pose. ${aesthetic}. ${realism}. Aspect ratio 3:2.` }]
       : sequence === 'Solo'
         ? activeHeroes.map(soloFinisherStoryboard)
         : [{ id: 'storyboard-finisher-team', kind: 'IMAGE • STORYBOARD 3:2', title: `Team Finisher Storyboard — ${finisher}`, text: `${storyboardLayout} Team finisher storyboard, ${activeHeroes.length}-hero team performing "${finisher}". Panel 1 (wide shot): tactical formation at ${location}. Panel 2 (medium group shot): each hero builds color-specific energy. Panel 3 (wide shot, dynamic): choreography in motion. Panel 4 (wide shot): energy combines into unified attack. Panel 5 (dramatic wide): combined strike released. Panel 6 (wide shot, low angle): team victory pose. ${aesthetic}. ${realism}. Aspect ratio 3:2.` }]
@@ -1022,20 +1039,42 @@ function App() {
     const heroCivilianLook = activeHeroes.map((h) => `${safe(h.name)} in ${civilianOutfitDetail(h)}`).join('; ')
     const heroHelmetCrests = activeHeroes.map((h) => `${safe(h.name)}: ${helmetCrestShape(h)}`).join('; ')
 
+    const countLabel = activeHeroes.length === 1
+      ? '1 hero'
+      : activeHeroes.length === 2
+        ? '2 heroes (duo formation)'
+        : `a team of ${activeHeroes.length} heroes`
+    const teamTitleLabel = sequence === 'Bersama'
+      ? (activeHeroes.length === 1 ? `Live-Action Solo Henshin Sequence — ${safe(activeHeroes[0]?.name || 'Hero')}` : activeHeroes.length === 2 ? 'Live-Action Duo Henshin Sequence (2 Heroes)' : `Live-Action Team Henshin Sequence (${activeHeroes.length} Heroes)`)
+      : `Live-Action Solo Henshin Sequence — ${safe(activeHeroes[0]?.name || 'Hero')}`
+    const civilianStance = activeHeroes.length === 1
+      ? 'The hero begins in a complete civilian outfit'
+      : activeHeroes.length === 2
+        ? 'The heroes begin in their complete civilian outfits, standing shoulder-to-shoulder in alert formation'
+        : 'The heroes begin in their complete civilian outfits, standing side-by-side in alert formation'
+    const shoutStatement = resolvedShout === 'Tanpa teriakan (Hening)'
+      ? `With calm, resolute focus, ${activeHeroes.length === 1 ? 'the hero initiates' : 'they initiate'} the transformation in focused silence without shouting, executing a decisive cross-body gesture to trigger their ${device[0].toLowerCase()} (${device[1]}).`
+      : `With fierce determination, ${activeHeroes.length === 1 ? `the hero shouts "${resolvedShout}"` : `they shout in unison "${resolvedShout}"`} before executing a decisive cross-body gesture to trigger their ${device[0].toLowerCase()} (${device[1]}).`
+    const finalPoseStatement = activeHeroes.length === 1
+      ? 'the hero strikes a battle-ready final pose'
+      : activeHeroes.length === 2
+        ? 'both heroes strike their synchronized battle-ready final pose'
+        : 'the entire team strikes their synchronized battle-ready final pose'
+
     const videoMain = mode === 'Henshin'
       ? {
         id: 'video-main',
         kind: 'VIDEO • SEEDANCE 2.0 / RUNWAY',
-        title: sequence === 'Bersama' ? `Live-Action Team Henshin Sequence (${activeHeroes.length} Heroes)` : `Live-Action Solo Henshin Sequence — ${safe(activeHeroes[0]?.name || 'Hero')}`,
-        text: `[ATTACH HERO SUIT AND CIVILIAN REFERENCE IMAGES AS CREF / IMAGE PROMPT] Hyperrealistic live-action tokusatsu henshin sequence of ${sequence === 'Bersama' ? `${activeHeroes.length} heroes` : safe(activeHeroes[0]?.name || 'the hero')} transforming from human form into full hero form, set at ${location}.
+        title: teamTitleLabel,
+        text: `[ATTACH HERO SUIT AND CIVILIAN REFERENCE IMAGES AS CREF / IMAGE PROMPT] Hyperrealistic live-action tokusatsu henshin sequence of ${sequence === 'Bersama' ? countLabel : safe(activeHeroes[0]?.name || 'the hero')} transforming from human form into full hero form, set at ${location}.
 
-The heroes begin in their complete civilian outfits (${heroCivilianLook}), standing side-by-side in alert formation. With fierce determination, they shout "Rawr!" before executing a decisive cross-body gesture to trigger their ${device[0].toLowerCase()} (${device[1]}).
+${civilianStance} (${heroCivilianLook}). ${shoutStatement}
 
 Instantly, vibrant elemental energy auras erupt around them: ${heroAuras}. Simultaneously in the background, colossal semi-translucent luminous ethereal spirits of their motif beasts (${heroBeastSpirits}) materialize from radiant plasma, roaring fiercely across the sky.
 
 Practical tokusatsu spark bursts and energetic light ribbons engulf their bodies, seamlessly transmuting civilian attire into sleek spandex hero suits (${sharedSuitSystem}; ${sharedAccentFinish}). Helmets lock into position with sculpted crests (${heroHelmetCrests}) and gleaming visors.
 
-Camera: slow push-in during the decisive device trigger, dynamic low-angle orbit during the elemental surge and roaring beast spirit manifestation, and a dramatic wide pull-back as the heroes strike their synchronized battle-ready final pose amidst swirling embers and ground smoke. ${aesthetic}; practical VFX pyrotechnics, cinematic lighting, 35mm lens, 8s, 24fps, 16:9.`,
+Camera: slow push-in during the decisive device trigger, dynamic low-angle orbit during the elemental surge and roaring beast spirit manifestation, and a dramatic wide pull-back as ${finalPoseStatement} amidst swirling embers and ground smoke. ${aesthetic}; practical VFX pyrotechnics, cinematic lighting, 35mm lens, 8s, 24fps, 16:9.`,
       }
       : {
         id: 'video-main',
@@ -1050,6 +1089,12 @@ In the background, colossal spectral avatars of their motif beasts (${heroMotifL
 Camera: low-angle dynamic tracking as energy gathers, fast whip-pan into the release strike, and a slow cinematic pull-back as heroes stand in a victorious low-angle hero pose with weapon lowered and smoke billowing behind them. ${aesthetic}; practical VFX, anamorphic 35mm lens, cinematic lighting, 8s, 24fps, 16:9.`,
       }
 
+    const shotType = activeHeroes.length === 1 ? 'Medium solo shot' : activeHeroes.length === 2 ? 'Medium two-shot' : 'Medium group shot'
+    const heroSubject = activeHeroes.length === 1 ? 'the hero' : 'the heroes'
+    const shoutAction = resolvedShout === 'Tanpa teriakan (Hening)'
+      ? `as ${heroSubject} stand in focused silence and initiate the cross-body gesture`
+      : `as ${heroSubject} shout "${resolvedShout}" and initiate the cross-body gesture`
+
     const videoCamera = {
       id: 'video-camera',
       kind: 'VIDEO • CAMERA & LENS DIRECTIVE',
@@ -1057,7 +1102,7 @@ Camera: low-angle dynamic tracking as energy gathers, fast whip-pan into the rel
       text: mode === 'Henshin'
         ? `Cinematography & camera movement timeline for AI video generation:
 • Aspect Ratio & Framing: 16:9 widescreen, 24fps cinematic motion blur, 35mm anamorphic prime lens with shallow depth of field.
-• 0.0s – 2.0s (Alert & Shout): Medium two-shot / group shot, slow steady push-in as heroes shout "Rawr!" and initiate the cross-body gesture.
+• 0.0s – 2.0s (Alert & Shout): ${shotType}, slow steady push-in ${shoutAction}.
 • 2.0s – 3.5s (Trigger & Ignition): Close-up rack focus to the ${device[0].toLowerCase()}, capturing tactile click, glowing indicators, and burst of mechanical sparks.
 • 3.5s – 6.0s (Elemental Surge & Beast Spirits): Dynamic low-angle upward tilt and smooth orbit tracking as color-coded elemental auras erupt and giant ethereal motif beast avatars loom and roar in the background.
 • 6.0s – 8.0s (Suit Lock & Final Pose): Fast, controlled wide pull-back revealing the full hero suits in heroic low-angle formation as they snap into their synchronized signature pose with background pyro sparks settling.`
@@ -1085,13 +1130,17 @@ Camera: low-angle dynamic tracking as energy gathers, fast whip-pan into the rel
 • Lighting: Dramatic backlighting from the explosion silhouette, strong amber rim light, atmospheric drifting smoke at ${location}.`,
     }
 
+    const vocalCalloutDesc = resolvedShout === 'Tanpa teriakan (Hening)'
+      ? 'Focused breathing and atmospheric tension before transformation trigger (no vocal shout).'
+      : `${activeHeroes.length === 1 ? 'Hero shouts' : 'Heroes shout in unison'} with intense grit: "${resolvedShout}" (decisive henshin battle cry).`
+
     const videoAudio = {
       id: 'video-audio',
       kind: 'VIDEO • DIALOGUE & SOUND DESIGN',
       title: mode === 'Henshin' ? 'Dialog, Teriakan & Desain Suara' : 'Dialog & Desain Suara Finisher',
       text: mode === 'Henshin'
         ? `Audio cue sheet and vocal choreography:
-• 0.5s [Vocal Callout]: Heroes shout in unison with intense grit: "Rawr!" (fierce henshin battle cry).
+• 0.5s [Vocal Callout]: ${vocalCalloutDesc}
 • 1.5s [Device Activation]: Crisp mechanical click, gear whine, and high-energy electronic chime from the ${device[0].toLowerCase()}.
 • 3.5s [Elemental & Beast Roar]: Monstrous primal roar of the ${heroMotifList} spirit beasts layered over roaring elemental plasma wind.
 • 5.8s [Armor Clank & Visor Gleam]: Sharp metallic snap as helmets lock, accompanied by a crystalline laser chime as visors light up.
@@ -1104,25 +1153,30 @@ Camera: low-angle dynamic tracking as energy gathers, fast whip-pan into the rel
 • 7.5s [Sheathing & Calm]: Crisp metallic weapon sheathe click and low heroic ambient rumble.`,
     }
 
-    const soloVideoPrompts = sequence === 'Solo' ? activeHeroes.map((h, i) => ({
-      id: `video-solo-${h.id}`,
-      kind: 'VIDEO • SOLO HENSHIN',
-      title: `${String(i + 1).padStart(2, '0')} · ${h.name} — Solo Live-Action Henshin`,
-      text: `[ATTACH ${h.name.toUpperCase()} HERO SUIT AND CIVILIAN REFERENCE IMAGES AS CREF] Hyperrealistic solo live-action tokusatsu henshin sequence of ${safe(h.name)} transforming from human form into full hero form at ${location}.
+    const soloVideoPrompts = sequence === 'Solo' ? activeHeroes.map((h, i) => {
+      const soloShoutText = resolvedShout === 'Tanpa teriakan (Hening)'
+        ? 'remains focused and silent'
+        : `fiercely shouts "${resolvedShout}"`
+      return {
+        id: `video-solo-${h.id}`,
+        kind: 'VIDEO • SOLO HENSHIN',
+        title: `${String(i + 1).padStart(2, '0')} · ${h.name} — Solo Live-Action Henshin`,
+        text: `[ATTACH ${h.name.toUpperCase()} HERO SUIT AND CIVILIAN REFERENCE IMAGES AS CREF] Hyperrealistic solo live-action tokusatsu henshin sequence of ${safe(h.name)} transforming from human form into full hero form at ${location}.
 
-Civilian form: ${h.age}-year-old ${h.gender.toLowerCase()}, ${h.ethnicity} heritage, ${h.body.toLowerCase()} build, wearing ${civilianOutfitDetail(h)}. Standing in a focused combat stance, ${safe(h.name)} fiercely shouts "Rawr!" before executing a decisive cross-body arm gesture to trigger the ${device[0].toLowerCase()} (${device[1]}).
+Civilian form: ${h.age}-year-old ${h.gender.toLowerCase()}, ${h.ethnicity} heritage, ${h.body.toLowerCase()} build, wearing ${civilianOutfitDetail(h)}. Standing in a focused combat stance, ${safe(h.name)} ${soloShoutText} before executing a decisive cross-body arm gesture to trigger the ${device[0].toLowerCase()} (${device[1]}).
 
 Instantly, vibrant ${AURAS[h.aura][0]} elemental energy (${AURAS[h.aura][2]}) wraps around the body. In the background sky, a colossal luminous ethereal spirit of a roaring ${motifSubName(h)} materializes in brilliant glowing plasma, unleashing an energetic shockwave.
 
 Practical tokusatsu spark bursts erupt as the ${AURAS[h.aura][0]} spandex suit (${sharedSuitSystem}) weaves over the body, and the helmet with sculpted ${helmetCrestShape(h)} locks in place with a sharp visor gleam.
 
-Camera: slow push-in during the shout and device trigger, dynamic low-angle orbit during the ${motifSubName(h)} spirit roar, and a wide pull-back for the heroic final combat pose. ${aesthetic}; practical VFX pyrotechnics, cinematic lighting, 8s, 24fps, 16:9.`,
-    })) : []
+Camera: slow push-in during the trigger, dynamic low-angle orbit during the ${motifSubName(h)} spirit roar, and a wide pull-back for the heroic final combat pose. ${aesthetic}; practical VFX pyrotechnics, cinematic lighting, 8s, 24fps, 16:9.`,
+      }
+    }) : []
 
     const videoOutputs = [videoMain, videoCamera, videoVfx, videoAudio, ...soloVideoPrompts]
     const seo = { id: 'seo', kind: 'PRODUCTION • SEO', title: 'Metadata Produksi', text: `Title: ${mode} ${sequence} — ${activeHeroes.map((h) => h.name).join(', ')}\nDescription: Hyperrealistic live-action tokusatsu scene in ${location}, styled as ${aesthetic}.\nKeywords: tokusatsu, super sentai inspired, live action superhero, practical spandex suit, cinematic henshin, ${teamMotif.toLowerCase()}, hyperrealistic video.\nSafety intent: original fictional characters.` }
     return { image: [teamReference, teamLogo, ...sheets, macro, ...storyboardItems], video: videoOutputs, seo: [seo] }
-  }, [activeHeroes, aesthetic, device, finisher, location, mode, sequence, sharedAccentFinish, sharedSuitSystem, teamMotif, teamName, chestEmblemMode])
+  }, [activeHeroes, aesthetic, device, finisher, location, mode, sequence, sharedAccentFinish, sharedSuitSystem, teamMotif, teamName, chestEmblemMode, resolvedShout])
 
   const generate = () => { setNotice(`Prompt ${mode.toLowerCase()} untuk ${activeHeroes.length} karakter telah diperbarui.`); setTab('image') }
   const currentOutputs = outputs[tab]
@@ -1145,6 +1199,10 @@ Camera: slow push-in during the shout and device trigger, dynamic low-angle orbi
           <SelectField label="Estetika visual" value={aesthetic} onChange={setAesthetic}>{option(AESTHETICS)}</SelectField>
           <SelectField label="Latar tempat" value={location} onChange={setLocation}>{option(LOCATIONS)}</SelectField>
           <SelectField label="Alat henshin" value={String(deviceIndex)} onChange={(v) => setDeviceIndex(Number(v))}>{DEVICES.map((d, i) => <option value={i} key={d[0]}>{d[0]}</option>)}</SelectField>
+          {mode === 'Henshin' && <>
+            <SelectField label="Teriakan / Slogan Henshin" value={shoutMode === 'custom' ? 'Kustom' : shoutPreset} onChange={(v) => { if (v === 'Kustom') { setShoutMode('custom') } else { setShoutMode('preset'); setShoutPreset(v) } }}>{SHOUT_PRESETS.map((s) => <option key={s} value={s}>{s}</option>)}<option value="Kustom">Kustom (Ketik sendiri)</option></SelectField>
+            {shoutMode === 'custom' && <label className="field"><span>Teks teriakan kustom</span><input value={customShout} onChange={(e) => setCustomShout(e.target.value)} placeholder="Contoh: Rawr! / Gao Access! / Morphin Time!" /></label>}
+          </>}
           <SelectField label="Nama tim" value={teamNameMode === 'custom' ? 'Kustom' : teamName} onChange={(v) => { if (v === 'Kustom') { setTeamNameMode('custom') } else { setTeamNameMode('preset'); setTeamName(v) } }}>{TEAM_NAME_PRESETS.map((n) => <option key={n} value={n}>{n}{LABELS[n] ? ` (${LABELS[n]})` : ''}</option>)}<option value="Kustom">Kustom (Buat sendiri)</option></SelectField>
           {teamNameMode === 'custom' && <label className="field"><span>Nama tim kustom</span><input value={teamName} onChange={(e) => setTeamName(e.target.value)} placeholder="Tulis nama tim sendiri..." /></label>}
           <SelectField label="Sistem kostum tim" value={teamSuitSystem} onChange={setTeamSuitSystem}>{TEAM_SUIT_SYSTEMS.map(([label]) => <option key={label} value={label}>{label}{LABELS[label] ? ` (${LABELS[label]})` : ''}</option>)}</SelectField>
