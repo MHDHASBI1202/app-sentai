@@ -1074,12 +1074,20 @@ function App() {
       const soloShoutAction = resolvedShout === 'Tanpa teriakan (Hening)'
         ? `In focused silence, ${safe(h.name)} performs rhythmic martial-arts arm poses and activates the ${device[0].toLowerCase()} with a decisive cross-body gesture.`
         : `${safe(h.name)} fiercely shouts "${resolvedShout}", performs rhythmic martial-arts arm poses, and activates the ${device[0].toLowerCase()} with a decisive cross-body gesture.`
-      return {
-        id: `video-solo-${h.id}`,
-        kind: 'VIDEO • SOLO HENSHIN',
-        title: `${String(i + 1).padStart(2, '0')} · ${h.name} — Solo Henshin Prompt`,
-        text: `[ATTACH CREF: ${h.name.toUpperCase()}] Live-action tokusatsu solo henshin: ${safe(h.name)} in civilian outfit starts at ${location}. ${soloShoutAction} The background shifts into a surreal transformation void as a colossal glowing ethereal ${motifSubName(h)} spirit roars toward the camera with swirling ${AURAS[h.aura][0]} energy. Practical sparks dissolve clothes into ${AURAS[h.aura][0]} spandex suit (${sharedSuitSystem}), and helmet locks with a flashing visor. Snapping back to ${location}, the hero lands in a battle-ready final pose amidst embers and smoke. Camera: slow push-in during trigger, dynamic tracking through dimension shift, wide pull for final stance. ${aesthetic}, practical VFX sparks, 8s, 16:9.`,
-      }
+
+      return mode === 'Henshin'
+        ? {
+          id: `video-solo-${h.id}`,
+          kind: 'VIDEO • SOLO HENSHIN (RUNWAY / KLING / SORA)',
+          title: `${String(i + 1).padStart(2, '0')} · ${h.name} — Solo Henshin Prompt`,
+          text: `[ATTACH CREF: ${h.name.toUpperCase()}] Live-action tokusatsu solo henshin: ${safe(h.name)} in civilian attire (${civilianOutfitDetail(h)}) starts at ${location}. ${soloShoutAction} The environment momentarily shifts into a surreal transformation dimension as a colossal glowing ethereal ${motifSubName(h)} spirit apparition roars toward the camera with swirling ${AURAS[h.aura][0]} aura (${AURAS[h.aura][2]}). Practical spark bursts envelop the body, materializing the fitted ${AURAS[h.aura][0]} spandex hero suit (${sharedSuitSystem}; ${sharedAccentFinish}) and helmet with sculpted ${helmetCrestShape(h)} and gleaming visor. Snapping back to ${location}, the hero lands in a dramatic, low-angle battle-ready final pose amidst drifting embers and smoke. Camera: slow push-in during trigger, dynamic tracking through dimension shift, wide pull for final pose. ${aesthetic}, practical VFX sparks, cinematic lighting, 8s, 16:9.`,
+        }
+        : {
+          id: `video-solo-${h.id}`,
+          kind: 'VIDEO • SOLO FINISHER (RUNWAY / KLING / SORA)',
+          title: `${String(i + 1).padStart(2, '0')} · ${h.name} — Solo Finisher Prompt`,
+          text: `[ATTACH CREF: ${h.name.toUpperCase()}] Live-action tokusatsu solo finisher: ${safe(h.name)} executes "${finisher}" at ${location}. On vocal command "${finisher}!", the hero charges their signature weapon with glowing ${AURAS[h.aura][0]} aura (${AURAS[h.aura][2]}). A colossal ethereal ${motifSubName(h)} spirit apparition surges forward alongside the hero into a devastating strike. A massive practical pyrotechnic spark and fireball explosion detonates behind the hero upon impact as they land in a victorious low-angle hero pose. Camera: dynamic tracking, fast whip-pan strike, slow pull-back. ${aesthetic}, practical VFX sparks, cinematic lighting, 8s, 16:9.`,
+        }
     }) : []
 
     const videoOutputs = sequence === 'Solo' ? soloVideoPrompts : [videoMain]
