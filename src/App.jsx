@@ -1034,147 +1034,55 @@ function App() {
       : sequence === 'Solo'
         ? activeHeroes.map(soloFinisherStoryboard)
         : [{ id: 'storyboard-finisher-team', kind: 'IMAGE • STORYBOARD 3:2', title: `Team Finisher Storyboard — ${finisher}`, text: `${storyboardLayout} Team finisher storyboard, ${activeHeroes.length}-hero team performing "${finisher}". Panel 1 (wide shot): tactical formation at ${location}. Panel 2 (medium group shot): each hero builds color-specific energy. Panel 3 (wide shot, dynamic): choreography in motion. Panel 4 (wide shot): energy combines into unified attack. Panel 5 (dramatic wide): combined strike released. Panel 6 (wide shot, low angle): team victory pose. ${aesthetic}. ${realism}. Aspect ratio 3:2.` }]
-    const heroMotifList = activeHeroes.map((h) => motifSubName(h)).join(' and ')
-    const heroBeastSpirits = activeHeroes.map((h) => `${motifSubName(h)} spirit for ${safe(h.name)}`).join(', ')
-    const heroAuras = activeHeroes.map((h) => `${safe(h.name)}: ${AURAS[h.aura][0]} aura with ${AURAS[h.aura][2]}`).join('; ')
-    const heroCivilianLook = activeHeroes.map((h) => `${safe(h.name)} in ${civilianOutfitDetail(h)}`).join('; ')
-    const heroHelmetCrests = activeHeroes.map((h) => `${safe(h.name)}: ${helmetCrestShape(h)}`).join('; ')
+    const heroAuraSummary = activeHeroes.length <= 3
+      ? activeHeroes.map((h) => `${AURAS[h.aura][0]} aura`).join(' and ')
+      : 'color-coded elemental auras'
+
+    const heroSpiritSummary = activeHeroes.length <= 3
+      ? activeHeroes.map((h) => `${motifSubName(h)} spirit`).join(' and ')
+      : `${teamMotif} beast spirits`
 
     const countLabel = activeHeroes.length === 1
       ? '1 hero'
       : activeHeroes.length === 2
         ? '2 heroes (duo formation)'
         : `a team of ${activeHeroes.length} heroes`
+
     const teamTitleLabel = sequence === 'Bersama'
-      ? (activeHeroes.length === 1 ? `Live-Action Solo Henshin Sequence — ${safe(activeHeroes[0]?.name || 'Hero')}` : activeHeroes.length === 2 ? 'Live-Action Duo Henshin Sequence (2 Heroes)' : `Live-Action Team Henshin Sequence (${activeHeroes.length} Heroes)`)
-      : `Live-Action Solo Henshin Sequence — ${safe(activeHeroes[0]?.name || 'Hero')}`
-    const civilianStance = activeHeroes.length === 1
-      ? 'The hero begins in a complete civilian outfit'
-      : activeHeroes.length === 2
-        ? 'The heroes begin in their complete civilian outfits, standing shoulder-to-shoulder in alert formation'
-        : 'The heroes begin in their complete civilian outfits, standing side-by-side in alert formation'
-    const shoutStatement = resolvedShout === 'Tanpa teriakan (Hening)'
-      ? `With calm, resolute focus, ${activeHeroes.length === 1 ? 'the hero initiates' : 'they initiate'} the transformation in focused silence without shouting, executing a decisive cross-body gesture to trigger their ${device[0].toLowerCase()} (${device[1]}).`
-      : `With fierce determination, ${activeHeroes.length === 1 ? `the hero shouts "${resolvedShout}"` : `they shout in unison "${resolvedShout}"`} before executing a decisive cross-body gesture to trigger their ${device[0].toLowerCase()} (${device[1]}).`
-    const finalPoseStatement = activeHeroes.length === 1
-      ? 'the hero strikes a battle-ready final pose'
-      : activeHeroes.length === 2
-        ? 'both heroes strike their synchronized battle-ready final pose'
-        : 'the entire team strikes their synchronized battle-ready final pose'
+      ? (activeHeroes.length === 1 ? `Live-Action Solo Henshin — ${safe(activeHeroes[0]?.name || 'Hero')}` : activeHeroes.length === 2 ? 'Live-Action Duo Henshin (2 Heroes)' : `Live-Action Team Henshin (${activeHeroes.length} Heroes)`)
+      : `Live-Action Solo Henshin — ${safe(activeHeroes[0]?.name || 'Hero')}`
+
+    const shoutAction = resolvedShout === 'Tanpa teriakan (Hening)'
+      ? `In focused silence, they activate their ${device[0].toLowerCase()} with a decisive cross-body gesture.`
+      : `They fiercely shout "${resolvedShout}" and activate their ${device[0].toLowerCase()} with a decisive cross-body gesture.`
 
     const videoMain = mode === 'Henshin'
       ? {
         id: 'video-main',
-        kind: 'VIDEO • SEEDANCE 2.0 / RUNWAY',
+        kind: 'VIDEO • COMPACT PROMPT (RUNWAY / KLING / SORA)',
         title: teamTitleLabel,
-        text: `[ATTACH HERO SUIT AND CIVILIAN REFERENCE IMAGES AS CREF / IMAGE PROMPT] Hyperrealistic live-action tokusatsu henshin sequence of ${sequence === 'Bersama' ? countLabel : safe(activeHeroes[0]?.name || 'the hero')} transforming from human form into full hero form, set at ${location}.
-
-${civilianStance} (${heroCivilianLook}). ${shoutStatement}
-
-Instantly, vibrant elemental energy auras erupt around them: ${heroAuras}. Simultaneously in the background, colossal semi-translucent luminous ethereal spirits of their motif beasts (${heroBeastSpirits}) materialize from radiant plasma, roaring fiercely across the sky.
-
-Practical tokusatsu spark bursts and energetic light ribbons engulf their bodies, seamlessly transmuting civilian attire into sleek spandex hero suits (${sharedSuitSystem}; ${sharedAccentFinish}). Helmets lock into position with sculpted crests (${heroHelmetCrests}) and gleaming visors.
-
-Camera: slow push-in during the decisive device trigger, dynamic low-angle orbit during the elemental surge and roaring beast spirit manifestation, and a dramatic wide pull-back as ${finalPoseStatement} amidst swirling embers and ground smoke. ${aesthetic}; practical VFX pyrotechnics, cinematic lighting, 35mm lens, 8s, 24fps, 16:9.`,
+        text: `[ATTACH CREF] Live-action tokusatsu henshin: ${countLabel} transform from human form to hero form at ${location}. ${shoutAction} Swirling ${heroAuraSummary} wraps their bodies as colossal glowing ethereal ${heroSpiritSummary} apparitions roar in the background. Practical sparks burst as civilian clothes dissolve into fitted spandex suits (${sharedSuitSystem}) and helmets lock with flashing visors. Camera: slow push-in during trigger, dynamic low-angle orbit during spirit roar, wide pull to synchronized battle-ready final pose. ${aesthetic}, practical VFX sparks, cinematic lighting, 8s, 16:9.`,
       }
       : {
         id: 'video-main',
-        kind: 'VIDEO • SEEDANCE 2.0 / RUNWAY',
-        title: sequence === 'Bersama' ? `Live-Action Team Finisher Sequence — ${finisher}` : `Live-Action Solo Finisher — ${safe(activeHeroes[0]?.name || 'Hero')}`,
-        text: `[ATTACH MASTER TEAM REFERENCE AS CREF] Hyperrealistic live-action tokusatsu finisher sequence: ${sequence === 'Bersama' ? `Team of ${activeHeroes.length} heroes` : safe(activeHeroes[0]?.name || 'the hero')} executing the signature finisher "${finisher}" at ${location}.
-
-The heroes stand in tight formation in full hero suits (${sharedSuitSystem}; ${sharedAccentFinish}). On vocal command, they charge their signature weapons, channeling their elemental energies: ${heroAuras}.
-
-In the background, colossal spectral avatars of their motif beasts (${heroMotifList}) surge forward alongside the heroes, merging into a unified devastating elemental strike released toward the target. Massive practical tokusatsu pyrotechnic spark and fireball explosion detonates behind the heroes upon impact.
-
-Camera: low-angle dynamic tracking as energy gathers, fast whip-pan into the release strike, and a slow cinematic pull-back as heroes stand in a victorious low-angle hero pose with weapon lowered and smoke billowing behind them. ${aesthetic}; practical VFX, anamorphic 35mm lens, cinematic lighting, 8s, 24fps, 16:9.`,
+        kind: 'VIDEO • COMPACT PROMPT (RUNWAY / KLING / SORA)',
+        title: sequence === 'Bersama' ? `Live-Action Team Finisher — ${finisher}` : `Live-Action Solo Finisher — ${safe(activeHeroes[0]?.name || 'Hero')}`,
+        text: `[ATTACH CREF] Live-action tokusatsu finisher: ${countLabel} execute "${finisher}" at ${location}. On vocal command "${finisher}!", they charge weapons with glowing ${heroAuraSummary}. Colossal ethereal ${heroSpiritSummary} apparitions surge forward alongside them into a unified strike. Massive practical pyrotechnic spark explosion detonates behind them as they land a victorious hero pose. Camera: dynamic tracking, fast whip-pan strike, slow pull-back. ${aesthetic}, practical VFX, cinematic lighting, 8s, 16:9.`,
       }
 
-    const shotType = activeHeroes.length === 1 ? 'Medium solo shot' : activeHeroes.length === 2 ? 'Medium two-shot' : 'Medium group shot'
-    const heroSubject = activeHeroes.length === 1 ? 'the hero' : 'the heroes'
-    const shoutAction = resolvedShout === 'Tanpa teriakan (Hening)'
-      ? `as ${heroSubject} stand in focused silence and initiate the cross-body gesture`
-      : `as ${heroSubject} shout "${resolvedShout}" and initiate the cross-body gesture`
-
-    const videoCamera = {
-      id: 'video-camera',
-      kind: 'VIDEO • CAMERA & LENS DIRECTIVE',
-      title: mode === 'Henshin' ? 'Gerakan Kamera & Sinematografi Henshin' : 'Gerakan Kamera & Sinematografi Finisher',
-      text: mode === 'Henshin'
-        ? `Cinematography & camera movement timeline for AI video generation:
-• Aspect Ratio & Framing: 16:9 widescreen, 24fps cinematic motion blur, 35mm anamorphic prime lens with shallow depth of field.
-• 0.0s – 2.0s (Alert & Shout): ${shotType}, slow steady push-in ${shoutAction}.
-• 2.0s – 3.5s (Trigger & Ignition): Close-up rack focus to the ${device[0].toLowerCase()}, capturing tactile click, glowing indicators, and burst of mechanical sparks.
-• 3.5s – 6.0s (Elemental Surge & Beast Spirits): Dynamic low-angle upward tilt and smooth orbit tracking as color-coded elemental auras erupt and giant ethereal motif beast avatars loom and roar in the background.
-• 6.0s – 8.0s (Suit Lock & Final Pose): Fast, controlled wide pull-back revealing the full hero suits in heroic low-angle formation as they snap into their synchronized signature pose with background pyro sparks settling.`
-        : `Cinematography & camera movement timeline for finisher sequence:
-• Aspect Ratio & Framing: 16:9 widescreen, 24fps cinematic motion blur, 35mm anamorphic prime lens.
-• 0.0s – 2.5s (Stance & Charge): Wide low-angle shot pushing slowly into medium shot as heroes lock their battle stance and weapon mechanisms charge with bright light.
-• 2.5s – 5.5s (Choreography & Strike): Fast kinetic tracking shot following the synchronized martial-arts dash and strike release, capturing motion blur and weapon energy arcs.
-• 5.5s – 8.0s (Explosion & Hero Landing): Slow-motion pull-back as a massive practical spark explosion erupts behind the heroes while they turn back to the camera and settle into their victory pose.`,
-    }
-
-    const videoVfx = {
-      id: 'video-vfx',
-      kind: 'VIDEO • PRACTICAL VFX & MOTIF SPIRITS',
-      title: mode === 'Henshin' ? 'Efek Visual, Roh Hewan Motif & Tata Cahaya' : 'Efek Visual, Ledakan Praktikal & Tata Cahaya',
-      text: mode === 'Henshin'
-        ? `Practical visual effects, elemental energy, and lighting directives:
-• Color-Coded Elemental Auras: ${heroAuras}.
-• Background Motif Beast Spirits: Colossal ethereal, semi-translucent glowing spirit entities of ${heroMotifList} soaring and roaring in the atmosphere behind the heroes, releasing atmospheric shockwaves before coalescing into each hero's chest.
-• Practical Tokusatsu Pyrotechnics: Authentic ground spark squibs (chaku-ka sparks), billowing atmospheric white smoke, rising embers, and heat distortion waves.
-• Lighting & Environment: ${aesthetic} high-contrast rim lighting catching glossy fiberglass helmets and matte spandex texture; atmospheric environmental light at ${location} colored by the heroes' aura glows.`
-        : `Visual effects and pyrotechnic directives:
-• Energy Charging: Concentrated elemental plasma streams flowing along weapon blades and barrels, casting intense colored light onto the heroes' suits.
-• Motif Beast Manifestation: Ethereal glowing energy projection of ${heroMotifList} soaring alongside the strike.
-• Practical Pyrotechnics: Gigantic authentic tokusatsu napalm and spark squib explosion detonating 10 meters behind the heroes, producing billowing black and orange fireball clouds with raining sparks.
-• Lighting: Dramatic backlighting from the explosion silhouette, strong amber rim light, atmospheric drifting smoke at ${location}.`,
-    }
-
-    const vocalCalloutDesc = resolvedShout === 'Tanpa teriakan (Hening)'
-      ? 'Focused breathing and atmospheric tension before transformation trigger (no vocal shout).'
-      : `${activeHeroes.length === 1 ? 'Hero shouts' : 'Heroes shout in unison'} with intense grit: "${resolvedShout}" (decisive henshin battle cry).`
-
-    const videoAudio = {
-      id: 'video-audio',
-      kind: 'VIDEO • DIALOGUE & SOUND DESIGN',
-      title: mode === 'Henshin' ? 'Dialog, Teriakan & Desain Suara' : 'Dialog & Desain Suara Finisher',
-      text: mode === 'Henshin'
-        ? `Audio cue sheet and vocal choreography:
-• 0.5s [Vocal Callout]: ${vocalCalloutDesc}
-• 1.5s [Device Activation]: Crisp mechanical click, gear whine, and high-energy electronic chime from the ${device[0].toLowerCase()}.
-• 3.5s [Elemental & Beast Roar]: Monstrous primal roar of the ${heroMotifList} spirit beasts layered over roaring elemental plasma wind.
-• 5.8s [Armor Clank & Visor Gleam]: Sharp metallic snap as helmets lock, accompanied by a crystalline laser chime as visors light up.
-• 7.2s [Impact & Landing]: Heavy bass impact thud and dramatic whoosh as heroes snap into their final battle stance, followed by crackling spark embers.`
-        : `Audio cue sheet for finisher execution:
-• 0.5s [Battle Command]: Heroes declare finisher name in unison: "${finisher}!"
-• 2.0s [Weapon Charge]: Ascending high-frequency power hum and mechanical locking clicks.
-• 4.5s [Strike Release]: Thunderous whoosh and sonic boom as the combined attack is unleashed.
-• 6.0s [Explosion Impact]: Enormous bass-heavy cinematic detonation boom with crackling fireworks and falling debris sound.
-• 7.5s [Sheathing & Calm]: Crisp metallic weapon sheathe click and low heroic ambient rumble.`,
-    }
-
     const soloVideoPrompts = sequence === 'Solo' ? activeHeroes.map((h, i) => {
-      const soloShoutText = resolvedShout === 'Tanpa teriakan (Hening)'
-        ? 'remains focused and silent'
-        : `fiercely shouts "${resolvedShout}"`
+      const soloShoutAction = resolvedShout === 'Tanpa teriakan (Hening)'
+        ? `In focused silence, ${safe(h.name)} activates the ${device[0].toLowerCase()} with a decisive cross-body gesture.`
+        : `${safe(h.name)} fiercely shouts "${resolvedShout}" and activates the ${device[0].toLowerCase()} with a decisive cross-body gesture.`
       return {
         id: `video-solo-${h.id}`,
         kind: 'VIDEO • SOLO HENSHIN',
-        title: `${String(i + 1).padStart(2, '0')} · ${h.name} — Solo Live-Action Henshin`,
-        text: `[ATTACH ${h.name.toUpperCase()} HERO SUIT AND CIVILIAN REFERENCE IMAGES AS CREF] Hyperrealistic solo live-action tokusatsu henshin sequence of ${safe(h.name)} transforming from human form into full hero form at ${location}.
-
-Civilian form: ${h.age}-year-old ${h.gender.toLowerCase()}, ${h.ethnicity} heritage, ${h.body.toLowerCase()} build, wearing ${civilianOutfitDetail(h)}. Standing in a focused combat stance, ${safe(h.name)} ${soloShoutText} before executing a decisive cross-body arm gesture to trigger the ${device[0].toLowerCase()} (${device[1]}).
-
-Instantly, vibrant ${AURAS[h.aura][0]} elemental energy (${AURAS[h.aura][2]}) wraps around the body. In the background sky, a colossal luminous ethereal spirit of a roaring ${motifSubName(h)} materializes in brilliant glowing plasma, unleashing an energetic shockwave.
-
-Practical tokusatsu spark bursts erupt as the ${AURAS[h.aura][0]} spandex suit (${sharedSuitSystem}) weaves over the body, and the helmet with sculpted ${helmetCrestShape(h)} locks in place with a sharp visor gleam.
-
-Camera: slow push-in during the trigger, dynamic low-angle orbit during the ${motifSubName(h)} spirit roar, and a wide pull-back for the heroic final combat pose. ${aesthetic}; practical VFX pyrotechnics, cinematic lighting, 8s, 24fps, 16:9.`,
+        title: `${String(i + 1).padStart(2, '0')} · ${h.name} — Solo Henshin Prompt`,
+        text: `[ATTACH CREF: ${h.name.toUpperCase()}] Live-action tokusatsu solo henshin: ${safe(h.name)} transforms from civilian outfit to hero form at ${location}. ${soloShoutAction} Swirling ${AURAS[h.aura][0]} aura wraps the body as a colossal glowing ethereal ${motifSubName(h)} spirit roars in the background. Practical sparks dissolve clothes into ${AURAS[h.aura][0]} spandex suit (${sharedSuitSystem}), and helmet locks with a flashing visor. Camera: slow push-in during trigger, dynamic low-angle orbit during spirit roar, wide pull to battle-ready final pose. ${aesthetic}, practical VFX sparks, cinematic lighting, 8s, 16:9.`,
       }
     }) : []
 
-    const videoOutputs = [videoMain, videoCamera, videoVfx, videoAudio, ...soloVideoPrompts]
+    const videoOutputs = sequence === 'Solo' ? soloVideoPrompts : [videoMain]
     const seo = { id: 'seo', kind: 'PRODUCTION • SEO', title: 'Metadata Produksi', text: `Title: ${mode} ${sequence} — ${activeHeroes.map((h) => h.name).join(', ')}\nDescription: Hyperrealistic live-action tokusatsu scene in ${location}, styled as ${aesthetic}.\nKeywords: tokusatsu, super sentai inspired, live action superhero, practical spandex suit, cinematic henshin, ${teamMotif.toLowerCase()}, hyperrealistic video.\nSafety intent: original fictional characters.` }
     return { image: [teamReference, teamLogo, ...sheets, macro, ...storyboardItems], video: videoOutputs, seo: [seo] }
   }, [activeHeroes, aesthetic, device, finisher, location, mode, sequence, sharedAccentFinish, sharedSuitSystem, teamMotif, teamName, chestEmblemMode, resolvedShout])
