@@ -1053,15 +1053,15 @@ function App() {
       : `Live-Action Solo Henshin — ${safe(activeHeroes[0]?.name || 'Hero')}`
 
     const shoutAction = resolvedShout === 'Tanpa teriakan (Hening)'
-      ? `In focused silence, they activate their ${device[0].toLowerCase()} with a decisive cross-body gesture.`
-      : `They fiercely shout "${resolvedShout}" and activate their ${device[0].toLowerCase()} with a decisive cross-body gesture.`
+      ? `In focused silence, they perform a rhythmic series of martial-arts arm poses and activate their ${device[0].toLowerCase()} with a decisive cross-body gesture.`
+      : `They fiercely shout "${resolvedShout}", perform a rhythmic series of martial-arts arm poses, and activate their ${device[0].toLowerCase()} with a decisive cross-body gesture.`
 
     const videoMain = mode === 'Henshin'
       ? {
         id: 'video-main',
         kind: 'VIDEO • COMPACT PROMPT (RUNWAY / KLING / SORA)',
         title: teamTitleLabel,
-        text: `[ATTACH CREF] Live-action tokusatsu henshin: ${countLabel} transform from human form to hero form at ${location}. ${shoutAction} Swirling ${heroAuraSummary} wraps their bodies as colossal glowing ethereal ${heroSpiritSummary} apparitions roar in the background. Practical sparks burst as civilian clothes dissolve into fitted spandex suits (${sharedSuitSystem}) and helmets lock with flashing visors. Camera: slow push-in during trigger, dynamic low-angle orbit during spirit roar, wide pull to synchronized battle-ready final pose. ${aesthetic}, practical VFX sparks, cinematic lighting, 8s, 16:9.`,
+        text: `[ATTACH CREF] Live-action tokusatsu henshin: ${countLabel} in civilian attire start at ${location}. ${shoutAction} The environment momentarily shifts into a surreal transformation dimension as colossal glowing ethereal ${heroSpiritSummary} apparitions roar toward the camera with swirling ${heroAuraSummary}. Practical spark bursts envelop their bodies, materializing fitted spandex hero suits (${sharedSuitSystem}) and helmets with gleaming visors. Snapping back to ${location}, they land in a synchronized, low-angle battle-ready final pose amidst drifting embers and smoke. Camera: slow push-in during trigger, dynamic tracking through dimension shift, wide pull for final pose. ${aesthetic}, practical VFX sparks, cinematic lighting, 8s, 16:9.`,
       }
       : {
         id: 'video-main',
@@ -1072,13 +1072,13 @@ function App() {
 
     const soloVideoPrompts = sequence === 'Solo' ? activeHeroes.map((h, i) => {
       const soloShoutAction = resolvedShout === 'Tanpa teriakan (Hening)'
-        ? `In focused silence, ${safe(h.name)} activates the ${device[0].toLowerCase()} with a decisive cross-body gesture.`
-        : `${safe(h.name)} fiercely shouts "${resolvedShout}" and activates the ${device[0].toLowerCase()} with a decisive cross-body gesture.`
+        ? `In focused silence, ${safe(h.name)} performs rhythmic martial-arts arm poses and activates the ${device[0].toLowerCase()} with a decisive cross-body gesture.`
+        : `${safe(h.name)} fiercely shouts "${resolvedShout}", performs rhythmic martial-arts arm poses, and activates the ${device[0].toLowerCase()} with a decisive cross-body gesture.`
       return {
         id: `video-solo-${h.id}`,
         kind: 'VIDEO • SOLO HENSHIN',
         title: `${String(i + 1).padStart(2, '0')} · ${h.name} — Solo Henshin Prompt`,
-        text: `[ATTACH CREF: ${h.name.toUpperCase()}] Live-action tokusatsu solo henshin: ${safe(h.name)} transforms from civilian outfit to hero form at ${location}. ${soloShoutAction} Swirling ${AURAS[h.aura][0]} aura wraps the body as a colossal glowing ethereal ${motifSubName(h)} spirit roars in the background. Practical sparks dissolve clothes into ${AURAS[h.aura][0]} spandex suit (${sharedSuitSystem}), and helmet locks with a flashing visor. Camera: slow push-in during trigger, dynamic low-angle orbit during spirit roar, wide pull to battle-ready final pose. ${aesthetic}, practical VFX sparks, cinematic lighting, 8s, 16:9.`,
+        text: `[ATTACH CREF: ${h.name.toUpperCase()}] Live-action tokusatsu solo henshin: ${safe(h.name)} in civilian outfit starts at ${location}. ${soloShoutAction} The background shifts into a surreal transformation void as a colossal glowing ethereal ${motifSubName(h)} spirit roars toward the camera with swirling ${AURAS[h.aura][0]} energy. Practical sparks dissolve clothes into ${AURAS[h.aura][0]} spandex suit (${sharedSuitSystem}), and helmet locks with a flashing visor. Snapping back to ${location}, the hero lands in a battle-ready final pose amidst embers and smoke. Camera: slow push-in during trigger, dynamic tracking through dimension shift, wide pull for final stance. ${aesthetic}, practical VFX sparks, 8s, 16:9.`,
       }
     }) : []
 
