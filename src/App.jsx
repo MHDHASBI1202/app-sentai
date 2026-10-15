@@ -1217,7 +1217,18 @@ function App() {
         }
     }) : []
 
-    const videoOutputs = sequence === 'Solo' ? soloVideoPrompts : [videoMain]
+    const rollCallPoseVideoDetails = activeHeroes
+      .map((h, i) => `${safe(h.name)} (${AURAS[h.aura][0]}): ${activeHeroes.length <= 2 ? heroSignaturePose(h, i) : heroSignaturePose(h, i).split(':')[0]}`)
+      .join('; ')
+
+    const videoRollCall = {
+      id: 'video-team-roll-call',
+      kind: 'VIDEO • TEAM ROLL CALL (RUNWAY / KLING / SORA)',
+      title: `${resolvedTeamName} — Live-Action Team Roll Call Sequence`,
+      text: `[ATTACH 'MASTER TEAM REFERENCE' AS CREF] Live-action tokusatsu team roll-call sequence: ${countLabel} in full hero suits (${sharedSuitSystem}; ${sharedAccentFinish}) assemble at ${location}. Stepping forward in synchronized cadence, they passionately announce their team name in thunderous unison, "${resolvedTeamName}!", while each hero simultaneously snaps into their distinctive character signature roll-call pose: ${rollCallPoseVideoDetails}. Behind them, a massive practical tokusatsu pyrotechnic spark and vibrant colored smoke wall explosion detonates in synchronized member colors (${teamColors}), sending thick billowing plumes into the sky. Camera: dynamic low-angle forward push-in as they step forward, rapid whip-pan across the members, pulling back wide into an epic heroic tableau pose with drifting sparks and windblown smoke. ${aesthetic}, practical tokusatsu VFX pyrotechnics, cinematic lighting, 8s, 16:9.`,
+    }
+
+    const videoOutputs = sequence === 'Solo' ? [...soloVideoPrompts, videoRollCall] : [videoMain, videoRollCall]
     const seo = { id: 'seo', kind: 'PRODUCTION • SEO', title: 'Metadata Produksi', text: `Title: ${mode} ${sequence} — ${activeHeroes.map((h) => h.name).join(', ')}\nDescription: Hyperrealistic live-action tokusatsu scene in ${location}, styled as ${aesthetic}.\nKeywords: tokusatsu, super sentai inspired, live action superhero, practical spandex suit, cinematic henshin, ${teamMotif.toLowerCase()}, hyperrealistic video.\nSafety intent: original fictional characters.` }
     return { image: [teamReference, teamRollCall, teamLogo, ...sheets, macro, ...storyboardItems], video: videoOutputs, seo: [seo] }
   }, [activeHeroes, aesthetic, device, finisher, location, mode, sequence, sharedAccentFinish, sharedSuitSystem, teamMotif, teamName, chestEmblemMode, resolvedShout])
