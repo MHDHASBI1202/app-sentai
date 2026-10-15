@@ -771,12 +771,12 @@ const motifAccentDetail = (hero, chestEmblemMode) => {
 }
 
 const heroSignaturePose = (hero, index) => {
-  if (hero.role === 'Sixth Ranger') {
+  if (hero?.role === 'Sixth Ranger') {
     return 'flamboyant signature roll-call flourish: body angled at a dynamic 45-degree swagger, one arm swept outward dramatically displaying the morpher device, opposite hand resting cockily on the hip, helmet tilted with visor catching the rim light'
   }
 
-  const sub = motifSubName(hero).toLowerCase()
-  const motif = motifName(hero).toLowerCase()
+  const sub = (motifSubName(hero) || '').toLowerCase()
+  const motif = (motifName(hero) || '').toLowerCase()
 
   // Dinosaur / Prehistoric
   if (/t.?rex|tyranno|carno|spino|allosaurus/.test(sub)) {
@@ -1099,6 +1099,8 @@ function App() {
     const formationRule = activeHeroes.length > 0 ? `Place ${safe(activeHeroes[0].name)} (${AURAS[activeHeroes[0].aura][0]}) in the center. ` : ''
     const teamReference = { id: 'team-design-bible', kind: 'IMAGE • TEAM CONTINUITY', title: `${resolvedTeamName} — Master Team Reference`, text: `Master full-body lineup of ${resolvedTeamName}, ${activeHeroes.length} heroes standing together. ${formationRule}${teamBible} Each hero: ${teamLineupDetails} Show every hero front-facing full body, ${teamReferenceChest} belt buckle, gloves, boots. This is the canonical design reference for individual hero generation. ${location}; ${aesthetic}. ${realism}.` }
 
+    const teamColors = activeHeroes.map((h) => AURAS[h.aura][0]).join(', ')
+
     let teamFormationDesc = ''
     if (activeHeroes.length === 1) {
       teamFormationDesc = `Solo centered roll-call formation: ${safe(activeHeroes[0].name)} commanding the center of the frame.`
@@ -1131,7 +1133,6 @@ function App() {
       { id: `sheet-${h.id}`, kind: 'IMAGE • CHARACTER SHEET 9:16', title: `${h.name} — Character Sheet`, text: `[ATTACH 'MASTER TEAM REFERENCE' AS CREF] 9:16 portrait character sheet for ${safe(h.name)}, white background. ${memberLock(h)} Layout: 2 columns (left = civilian, right = hero), 5 rows. Row 1: front full body. Row 2: 3/4 angle full body (striking signature roll-call pose: ${heroSignaturePose(h, i)}). Row 3: side profile full body. Row 4: back full body. Row 5: close-up head/face (civilian) and close-up helmet (hero). Civilian column: ${civilianOutfitDetail(h)}. Hero column: ${h.motif === 'Kustom' ? h.customMotif : h.submotif}${feminineDesignName(h)}, helmet: ${helmetCrestShape(h)}, ${motifAccentDetail(h, chestEmblemMode)}. Label each panel. Orthographic reference style, clean even lighting, ${realism}. Aspect ratio 9:16.` },
     ])
     const macro = { id: 'macro-device', kind: 'IMAGE • PROP MACRO', title: 'Macro Henshin Device', text: `Product photo of a ${device[0].toLowerCase()}, brushed metal, painted ABS plastic, translucent resin lens, tactile buttons, tokusatsu TV prop quality. ${device[1]}. Dark studio tabletop, rim light, shallow depth of field, hyperrealistic, 4k.` }
-    const teamColors = activeHeroes.map((h) => AURAS[h.aura][0]).join(', ')
     const primaryMotif = activeHeroes[0] ? (activeHeroes[0].motif === 'Kustom' ? (activeHeroes[0].customMotif || 'heroic') : activeHeroes[0].motif) : 'heroic'
     const katakanaText = TEAM_NAME_KATAKANA[teamName.trim()] || ''
     const logoTextInstruction = katakanaText
