@@ -14,12 +14,12 @@ export const FIGHT_STYLES = [
 export const FIGHT_ENDINGS = [['draw', 'Imbang / saling menahan'], ['a', 'Petarung A menang'], ['b', 'Petarung B menang']]
 export const NO_IMAGE_TEXT = 'Render only the visual scene. Names, roles and staging notes are context only, never visible artwork. No text overlays, captions, subtitles, nameplates, labels, panel numbers, speech bubbles, lettering or watermarks. Costume emblems are pictorial symbols without words.'
 
-export function buildBattleOutputs({ fighters, matchup, style = 'martial', ending = 'draw', duration = 8, location, aesthetic }) {
+export function buildBattleOutputs({ fighters, matchup, style = 'martial', ending = 'draw', duration = 15, location, aesthetic }) {
   const selected = MATCHUPS.find(([id]) => id === matchup)
   if (!selected || fighters.length !== 2 || new Set(fighters.map(f => f.id)).size !== 2) throw new Error('A duel requires exactly two distinct fighters and a supported matchup.')
   if (fighters.some((fighter, index) => fighter.franchise !== selected[2][index])) throw new Error('Fighter types must match the selected matchup.')
   const fightStyle = FIGHT_STYLES.find(([id]) => id === style)
-  if (!fightStyle || !FIGHT_ENDINGS.some(([id]) => id === ending) || ![8, 12].includes(duration)) throw new Error('Unsupported fight settings.')
+  if (!fightStyle || !FIGHT_ENDINGS.some(([id]) => id === ending) || ![15, 30].includes(duration)) throw new Error('Unsupported fight settings.')
   const [a, b] = fighters
   const title = `${a.name} vs ${b.name}`
   const roster = `FIGHTER A, initially screen-left: ${a.description}\nFIGHTER B, initially screen-right: ${b.description}`
@@ -36,20 +36,34 @@ export function buildBattleOutputs({ fighters, matchup, style = 'martial', endin
   const item = (id, kind, title, text) => ({ id, kind, title, text })
   const image = [
     item('duel-master', 'IMAGE • DUEL CONTINUITY', `${title} — Master Duel Reference`, `Neutral full-body reference photograph of exactly two opposing heroes, separated with clear silhouettes, A screen-left and B screen-right, three-quarter inward-facing guards, both helmets and boots visible. ${continuity} ${scene} 16:9.`),
-    ...fighters.map((fighter, index) => item(`duel-fighter-${index}`, 'IMAGE • HERO FORM', `${index === 0 ? 'A' : 'B'} · ${fighter.name} — Fighter Reference`, `[ATTACH 'MASTER DUEL REFERENCE' AS CREF] Photograph only this one fighter, head to toe in a comfortable ready stance: ${fighter.description} Preserve the reference costume exactly. Clean neutral background, gentle studio lighting.`)),
+    ...fighters.flatMap((fighter, index) => [
+      item(`duel-human-${index}`, 'IMAGE • HUMAN FORM', `${index === 0 ? 'A' : 'B'} · ${fighter.name} — Civilian Reference`, `Photograph only this one fictional person, full body, head to toe: ${fighter.civilianDescription}. Preserve the selected hair, complete civilian outfit, accessories, age and physique. This is a separate identity reference, not a frame from the duel. Neutral studio background, natural expression.`),
+      item(`duel-fighter-${index}`, 'IMAGE • HERO FORM', `${index === 0 ? 'A' : 'B'} · ${fighter.name} — Fighter Reference`, `[ATTACH 'MASTER DUEL REFERENCE' AS CREF] Photograph only this one fighter, head to toe in a comfortable ready stance: ${fighter.description} Preserve the reference costume exactly. Clean neutral background, gentle studio lighting.`),
+      item(`duel-sheet-${index}`, 'IMAGE • CHARACTER SHEET 9:16', `${index === 0 ? 'A' : 'B'} · ${fighter.name} — Character Sheet`, `[ATTACH THIS FIGHTER'S CIVILIAN REFERENCE AND HERO REFERENCE AS CREF] One character shown in two columns, civilian left and complete hero costume right. Five rows, top to bottom: front, three-quarter, side, back, face and helmet close-up. Civilian: ${fighter.civilianDescription}. Hero: ${fighter.description}. Preserve the same underlying human identity across both columns. Clean white studio background, empty gutters, no labels. Aspect ratio 9:16.`),
+    ]),
     item('duel-keyframe', 'IMAGE • BATTLE KEYFRAME', `${title} — Cinematic Clash`, `${cref} One readable freeze-frame from the exchange: ${style === 'martial' ? 'A extends one straight punch into B\'s raised forearm guard; B is visibly braced, both bodies separated, elbows and shoulders anatomically aligned' : 'A and B meet in a single guarded weapon parry, each holding their own selected weapon, feet planted with convincing weight transfer'}. Both fighters remain fully readable, slight low-angle medium-wide camera, subtle motion blur only on the moving limb or prop, crisp helmets and costumes. ${mechanics} ${scene} 16:9.`),
-    item('duel-storyboard', 'IMAGE • STORYBOARD 3:2', `${title} — Duel Storyboard`, `${cref} Six equal visual panels in a strict 2-column, 3-row grid, clean empty gutters; read left to right, top to bottom. Visual beats: wide face-off; A initiates the attack; B defends; B counters and A reacts; both recover their footing; chosen ending: ${finish} Preserve positions and designs in every panel. Exchange choreography: ${fightStyle[2]}. ${mechanics} ${scene} Storyboard aspect ratio 3:2.`),
-  ].map(prompt => ({ ...prompt, text: `${prompt.text}\n${NO_IMAGE_TEXT}` }))
-  const intro = 'Establish the two fighters facing one another at believable striking distance, breathe naturally and take one measured step to close the gap. Camera: slow low-angle medium-wide push, both full bodies visible.'
-  const exchange = `Show one readable exchange: ${fightStyle[2]}. Camera: smooth lateral track on the same side of the action axis, keep both fighters in frame and show attack, defense and recoil clearly.`
-  const conclusion = `${finish} Camera: brief restrained slow motion at the decisive guarded contact, return to normal speed for recovery, settle into a steady wide ending with both fighters visible. No victory text.`
-  const sound = 'Sound: grounded footsteps, fabric movement, armor movement and short guarded impact sounds synchronized with visible contact, restrained cinematic bass; no dialogue or subtitles.'
-  const firstBeat = duration === 8 ? 2 : 3
-  const secondBeat = duration === 8 ? 6 : 9
-  const video = [
-    item('duel-video', 'VIDEO • 1 VS 1 FIGHT', `${title} — Complete Duel (${duration}s)`, `${cref}\n${scene}\n${mechanics}\nTimeline, ${duration}s total: 0–${firstBeat}s: two-fighter face-off and one step into range. ${firstBeat}–${secondBeat}s: ${fightStyle[2]}. ${secondBeat}–${duration}s: ${finish} Camera: one smooth medium-wide tracking shot, preserve the action axis, a brief restrained emphasis on guarded contact, no rapid cuts. ${sound} 16:9.`),
-    ...[intro, exchange, conclusion].map((action, index) => item(`duel-clip-${index}`, 'VIDEO • CONTINUOUS DUEL CLIP', `${title} — Clip ${index + 1}: ${['Face-off', 'Exchange', 'Resolution'][index]} (${duration}s)`, `${cref}\n${index ? `[ATTACH THE FINAL FRAME OF CLIP ${index} AS THE START FRAME] Start with exactly the prior ending positions, stance, weapon grips, light and camera side. ` : ''}${action} ${mechanics} ${scene} ${sound} ${duration}s, 16:9. End on a stable frame that can be used as the next clip's start reference.`)),
   ]
-  const seo = [item('duel-seo', 'PRODUCTION • SEO', 'Metadata Pertarungan', `Title: ${title}\nMatchup: ${selected[1]}\nDescription: Realistic cinematic one-on-one tokusatsu duel at ${location}. Exactly two fighters, clean physical costumes and grounded stunt choreography.\nEnding: ${ending === 'draw' ? 'Draw' : `${ending.toUpperCase()} wins`}\nKeywords: tokusatsu, live action, 1vs1, cinematic duel, ${fighters.map(f => f.franchise).join(', ')}.`)]
-  return applyProductionStyle({ image, video, seo })
+  const sound = 'Sound: grounded footsteps, fabric movement, armor movement and short guarded impact sounds synchronized with visible contact, restrained cinematic bass; no dialogue or subtitles.'
+  const bridge = 'Both fighters recover into close guarded positions, maintain eye contact and visibly prepare the next exchange. Neither has won yet; no yielding, victory pose or decisive finish. End on a stable medium-wide continuation frame with the exact stances, spacing and weapon grips clearly visible.'
+  const followUp = style === 'martial'
+    ? 'B tests the guard with a short feint, A slips a half-step outside and checks the lead arm, B pivots to face A and both recover balance'
+    : 'B makes one measured weapon feint, A parries outside the body line, B turns with the pressure and A steps into a controlled counter position'
+  const scenePlans = duration === 15 ? [{
+    timeline: `0–3s: two-fighter face-off and one measured step into range. 3–11s: ${fightStyle[2]}. 11–15s: ${finish}`,
+    beats: `wide face-off; A initiates the attack; B defends; B counters and A reacts; both recover their footing; chosen ending: ${finish}`,
+  }] : [{
+    timeline: `0–3s: establish the two fighters at credible striking distance. 3–11s: ${fightStyle[2]}. 11–15s: ${bridge}`,
+    beats: `wide face-off; A steps into range; A initiates the attack; B defends; B counters and A reacts; ${bridge}`,
+  }, {
+    timeline: `0–3s: continue directly from the held guard at the end of Scene 1, no reset or new introduction. 3–11s: ${followUp}. 11–15s: ${finish}`,
+    beats: `same guarded positions from the end of Scene 1; B initiates the follow-up; A defends; measured counter; contact and recovery; chosen ending: ${finish}`,
+  }]
+  const video = scenePlans.map((plan, index) => {
+    const continuation = index === 1 ? '[ATTACH THE FINAL FRAME OF SCENE 1 AS THE START FRAME OF SCENE 2] Match the exact prior positions, distance, weapon grips, lighting, camera side and costume details. Do not return the fighters to their opening marks. ' : ''
+    const label = duration === 15 ? 'Complete Duel (15s)' : `Scene ${index + 1} of 2 (15s) — ${index === 0 ? 'Opening & Exchange' : 'Continuation & Resolution'}`
+    image.push(item(`duel-storyboard-${index}`, 'IMAGE • STORYBOARD 3:2', `${title} — Scene ${index + 1} Storyboard`, `${cref} ${continuation} Six equal visual panels in a strict 2-column, 3-row grid, clean empty gutters; read left to right, top to bottom. Visual beats: ${plan.beats}. Preserve positions and designs in every panel. ${mechanics} ${scene} Storyboard aspect ratio 3:2.`))
+    return item(`duel-scene-${index}`, 'VIDEO • 1 VS 1 FIGHT', `${title} — ${label}`, `${cref}\n${continuation}${scene}\n${mechanics}\nScene ${index + 1} of ${scenePlans.length}. Timeline, 15s total for this scene${duration === 30 ? `; overall duel time ${index * 15}–${(index + 1) * 15}s of 30s` : ''}: ${plan.timeline} Camera: smooth medium-wide tracking on the same side of the action axis, brief restrained emphasis on guarded contact, no rapid cuts. ${sound} Render exactly 15 seconds, 16:9.`)
+  })
+  const seo = [item('duel-seo', 'PRODUCTION • SEO', 'Metadata Pertarungan', `Title: ${title}\nMatchup: ${selected[1]}\nDuration: ${duration} seconds total; ${scenePlans.length} scene(s) × 15 seconds.\nDescription: Realistic cinematic one-on-one tokusatsu duel at ${location}. Exactly two fighters, clean physical costumes and grounded stunt choreography.\nEnding: ${ending === 'draw' ? 'Draw' : `${ending.toUpperCase()} wins`}\nKeywords: tokusatsu, live action, 1vs1, cinematic duel, ${fighters.map(f => f.franchise).join(', ')}.`)]
+  return applyProductionStyle({ image: image.map(prompt => ({ ...prompt, text: `${prompt.text}\n${NO_IMAGE_TEXT}` })), video, seo })
 }

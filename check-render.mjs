@@ -7,7 +7,7 @@ import { MATCHUPS } from './src/battle.js'
 
 const server = await createServer({ server: { middlewareMode: true } })
 try {
-  const { default: App } = await server.ssrLoadModule('/src/App.jsx')
+  const { default: App, makeBattleFighter, describeBattleFighter } = await server.ssrLoadModule('/src/App.jsx')
   const html = renderToString(React.createElement(App))
   assert.ok(html.includes('Super Sentai'))
   assert.ok(html.includes('Kamen Rider'))
@@ -43,6 +43,13 @@ try {
     assert.ok(duelHtml.includes('Buat Prompt Pertarungan'))
     assert.ok(duelHtml.includes('No text overlays'))
     const battleOutput = duelHtml.slice(duelHtml.indexOf('Battle Production Output'))
+    const battlePanel = duelHtml.slice(duelHtml.indexOf('class="app-shell battle-workspace"'))
+    for (const field of ['Gaya rambut', 'Outfit civilian', 'Aksesori', 'Penempatan Logo Dada', 'Nama panggilan', 'Jenis kelamin', 'Etnis / ras', 'Bentuk tubuh', 'Umur karakter', 'Suit coverage', 'Sub-motif']) assert.ok(battlePanel.includes(field), `${label}: ${field}`)
+    if (types[0] === 'rider') assert.ok(battlePanel.includes('Finisher pribadi'))
+    assert.ok(battlePanel.includes('15 detik (1 scene)'))
+    assert.ok(battlePanel.includes('30 detik (2 scene × 15 detik)'))
+    assert.ok(!battlePanel.includes('8 detik'))
+    assert.ok(!battlePanel.includes('12 detik'))
     assert.match(battleOutput, /FIGHTER A, initially screen-left/)
     assert.match(battleOutput, /FIGHTER B, initially screen-right/)
     if (types.includes('rider')) assert.match(battleOutput, /Sculpted practical Rider armor/)
@@ -50,4 +57,14 @@ try {
     assert.doesNotMatch(battleOutput, /undefined|NaN/)
     console.log(`Duel configuration and fighter descriptions render: ${label}: OK`)
   }
+  const customFighter = { ...makeBattleFighter(0), hair: 'Ponytail tinggi', outfit: 'Batik formal', accessory: 'Kacamata', riderSeries: 'Kamen Rider Orbit', riderSuitSystem: 'Knight plated armor', riderFinisher: 'Aerial Dive Kick', chestEmblemMode: 'Tanpa logo di dada (Polos)' }
+  const customProfile = describeBattleFighter(customFighter, 'rider')
+  assert.match(customProfile.civilianDescription, /Ponytail tinggi/)
+  assert.match(customProfile.civilianDescription, /batik/)
+  assert.match(customProfile.civilianDescription, /Kacamata/)
+  assert.match(customProfile.description, /Kamen Rider Orbit/)
+  assert.match(customProfile.description, /angular knight breastplate/)
+  assert.match(customProfile.description, /Aerial Dive Kick/)
+  assert.match(customProfile.description, /No series or team crest on the chest/)
+  console.log('Full civilian and costume options propagate to fighter references: OK')
 } finally { await server.close() }

@@ -823,7 +823,7 @@ function SelectField({ label, value, onChange, children }) {
   return <label className="field"><span>{label}</span><div className="select-wrap"><select value={value} onChange={(e) => onChange(e.target.value)}>{children}</select><ChevronDown size={15} /></div></label>
 }
 
-function HeroCard({ hero, index, expanded, onToggle, onChange, device, unifiedMotif, isRider, combatOnly = false }) {
+function HeroCard({ hero, index, expanded, onToggle, onChange, device, unifiedMotif, isRider }) {
   const aura = AURAS[hero.aura]
   const submotifs = MOTIFS[hero.motif] || []
   const female = isFeminineGender(hero.gender)
@@ -845,7 +845,7 @@ function HeroCard({ hero, index, expanded, onToggle, onChange, device, unifiedMo
           <SelectField label="Mata / visor helm" value={hero.eyes} onChange={v => onChange('eyes', v)}>{option(RIDER_EYES)}</SelectField>
           <SelectField label="Driver pribadi" value={hero.driver} onChange={v => onChange('driver', v)}>{option(RIDER_DEVICES.map(([n]) => n))}</SelectField>
           <SelectField label="Aksen armor pribadi" value={hero.riderAccent} onChange={v => onChange('riderAccent', v)}>{option(['Ikuti aksen seri', ...TEAM_ACCENT_FINISHES.map(([n]) => n)])}</SelectField>
-          {!combatOnly && <SelectField label="Finisher pribadi" value={hero.riderFinisher} onChange={v => onChange('riderFinisher', v)}>{option(RIDER_FINISHERS)}</SelectField>}
+          <SelectField label="Finisher pribadi" value={hero.riderFinisher} onChange={v => onChange('riderFinisher', v)}>{option(RIDER_FINISHERS)}</SelectField>
           <label className="field"><span>Form / wujud</span><input value={hero.form} onChange={e => onChange('form', e.target.value)} placeholder="Base / Upgrade / Final Form" /></label>
           <label className="field"><span>Senjata / perlengkapan</span><input value={hero.weapon} onChange={e => onChange('weapon', e.target.value)} /></label>
           <label className="field"><span>Ciri desain unik</span><input value={hero.riderDetail} onChange={e => onChange('riderDetail', e.target.value)} placeholder="Contoh: tanduk bercabang, bahu kiri besar" /></label>
@@ -863,11 +863,9 @@ function HeroCard({ hero, index, expanded, onToggle, onChange, device, unifiedMo
       </div>
       <label className="age-field"><span>Umur karakter <b>{hero.age} tahun</b></span><input type="range" min="10" max="50" value={hero.age} onChange={(e) => onChange('age', Number(e.target.value))} style={{ accentColor: aura[1] }} /><i>10</i><i>50</i></label>
       <div className="field-grid three">
-        {!combatOnly && <>
-          <SelectField label="Gaya rambut" value={hero.hair} onChange={(v) => onChange('hair', v)}>{option(SELECTS.hair)}</SelectField>
-          <SelectField label="Outfit civilian — set lengkap" value={hero.outfit} onChange={(v) => onChange('outfit', v)}>{option(SELECTS.outfit)}</SelectField>
-          <SelectField label="Aksesori" value={hero.accessory} onChange={(v) => onChange('accessory', v)}>{option(SELECTS.accessory)}</SelectField>
-        </>}
+        <SelectField label="Gaya rambut" value={hero.hair} onChange={(v) => onChange('hair', v)}>{option(SELECTS.hair)}</SelectField>
+        <SelectField label="Outfit civilian — set lengkap" value={hero.outfit} onChange={(v) => onChange('outfit', v)}>{option(SELECTS.outfit)}</SelectField>
+        <SelectField label="Aksesori" value={hero.accessory} onChange={(v) => onChange('accessory', v)}>{option(SELECTS.accessory)}</SelectField>
       </div>
       <div className="field-grid two">
         <SelectField label="Warna aura / energi" value={String(hero.aura)} onChange={(v) => onChange('aura', Number(v))}>{AURAS.map((a, i) => <option key={a[0]} value={i}>{a[0]}{AURA_LABELS[a[0]] ? ` (${AURA_LABELS[a[0]]})` : ''}</option>)}</SelectField>
@@ -1265,11 +1263,15 @@ const battleCatalog = {
   locations: LOCATIONS, aesthetics: AESTHETICS.filter(value => value !== 'Super Sentai Pop 2000-an'), motifs: MOTIFS,
   riderSeries: RIDER_SERIES, sentaiSeries: TEAM_NAME_PRESETS, accents: TEAM_ACCENT_FINISHES.map(([label]) => label),
   sentaiSuits: TEAM_SUIT_SYSTEMS.map(([label]) => label), devices: DEVICES,
+  riderSuits: RIDER_ARMORS.map(([label]) => label), chestOptions: CHEST_EMBLEM_OPTIONS,
+  finishers: FINISHERS, riderSeriesLabels: RIDER_SERIES_LABELS,
 }
 
-const makeBattleFighter = (index) => ({
+export const makeBattleFighter = (index) => ({
   ...makeHero(index), ...makeRider(index), riderSeries: RIDER_SERIES[0], sentaiSeries: TEAM_NAME_PRESETS[0],
   suitSystem: TEAM_SUIT_SYSTEMS[0][0], accent: TEAM_ACCENT_FINISHES[0][0], deviceIndex: 0,
+  riderSuitSystem: RIDER_ARMORS[0][0], chestEmblemMode: CHEST_EMBLEM_OPTIONS[0],
+  riderSeriesMode: 'preset', sentaiSeriesMode: 'preset', sentaiFinisher: FINISHERS.default[0],
   weapon: index === 0 ? 'Single short sword' : 'Short staff',
   ...(index === 0 ? { motif: 'Insect', submotif: MOTIFS.Insect[0] } : {}),
 })
@@ -1280,13 +1282,19 @@ export function describeBattleFighter(hero, franchise) {
   const motif = hero.motif === 'Kustom' ? hero.customMotif.trim() || 'original custom motif' : `${hero.submotif} ${hero.motif}`
   const accent = isRider && hero.riderAccent !== 'Ikuti aksen seri' ? hero.riderAccent : hero.accent
   const finish = TEAM_ACCENT_FINISHES.find(([label]) => label === accent)?.[1] || accent
+  const chestMode = hero.chestEmblemMode || CHEST_EMBLEM_OPTIONS[0]
+  const crest = chestMode === CHEST_EMBLEM_OPTIONS[2] || chestMode === CHEST_EMBLEM_OPTIONS[3]
+    ? 'No series or team crest on the chest.'
+    : 'Original pictorial series or team crest on the left chest.'
+  const finisher = isRider ? hero.riderFinisher : hero.sentaiFinisher
   const costume = isRider
-    ? `Sculpted practical Rider armor: ${RIDER_ARMORS.find(([label]) => label === hero.armor)?.[1]}. Helmet has ${hero.eyes}, a ${motif} crest, personal jaw guard and antenna shape. ${hero.form}. ${hero.riderRole}. ${RIDER_DEVICES.find(([label]) => label === hero.driver)?.join(': ')}. ${hero.riderDetail}`
+    ? `Sculpted practical Rider armor: ${RIDER_ARMORS.find(([label]) => label === hero.armor)?.[1]}. Series design direction: ${RIDER_ARMORS.find(([label]) => label === hero.riderSuitSystem)?.[1] || RIDER_ARMORS[0][1]}; retain this Rider's personal armor architecture. Helmet has ${hero.eyes}, a ${motif} crest, personal jaw guard and antenna shape. ${hero.form}. ${hero.riderRole}. ${RIDER_DEVICES.find(([label]) => label === hero.driver)?.join(': ')}. ${hero.riderDetail}`
     : `Physical fabric-first Super Sentai suit: ${TEAM_SUIT_SYSTEMS.find(([label]) => label === hero.suitSystem)?.[1]}. Helmet: ${helmetCrestShape(hero)}. ${hero.role === 'Sixth Ranger' ? `Sixth Ranger variant: ${sixthStyleDetail(hero.sixthStyle)}. ${['Aksen warna berbeda', 'Armor + aksen unik', 'Kombinasi lengkap'].includes(hero.sixthStyle) ? sixthAccentDetail(hero.sixthAccent) : ''}` : 'Main Team member'}. ${DEVICES[hero.deviceIndex].join(': ')}`
   const feminine = isRider ? feminineDesignName(hero).replaceAll('spandex', 'flexible armored undersuit').replaceAll('minimal armor', 'articulated armor') : feminineDesignName(hero)
   return {
-    id: hero.id, franchise, name, weapon: hero.weapon.trim() || 'a compact training sword',
-    description: `${name}, ${isRider ? 'Kamen Rider' : 'Super Sentai'} from ${isRider ? hero.riderSeries : hero.sentaiSeries}. ${hero.age}-year-old ${hero.gender}, ${hero.ethnicity} heritage, ${hero.body} build. ${AURAS[hero.aura][0]} primary color; ${finish}. Coverage: ${hero.coverage}. Motif: ${motif}. ${costume}. ${motifAccentDetail(hero, CHEST_EMBLEM_OPTIONS[0])}${feminine}. Equipment: ${hero.weapon.trim() || 'a compact training sword'}.`,
+    id: hero.id, franchise, name, weapon: hero.weapon.trim() || 'a compact training sword', finisher,
+    civilianDescription: `${hero.name}, ${hero.age}-year-old ${hero.gender}, ${hero.ethnicity} heritage, ${hero.body} build, ${hero.hair}. Wearing ${civilianOutfitDetail(hero)}, with ${hero.accessory}. Same fictional human identity beneath ${name}'s helmet.`,
+    description: `${name}, ${isRider ? 'Kamen Rider' : 'Super Sentai'} from ${isRider ? hero.riderSeries.trim() || 'Original Rider Series' : hero.sentaiSeries.trim() || 'Original Sentai Team'}. ${hero.age}-year-old ${hero.gender}, ${hero.ethnicity} heritage, ${hero.body} build. ${AURAS[hero.aura][0]} primary color; ${finish}. Coverage: ${hero.coverage}. Motif: ${motif}. ${costume}. ${crest} ${motifAccentDetail(hero, chestMode)}${feminine}. Equipment: ${hero.weapon.trim() || 'a compact training sword'}. Signature finisher reference: ${finisher}; use only when explicitly called for by the fight choreography.`,
   }
 }
 
