@@ -69,7 +69,7 @@ export default function BattlePanel({ catalog, makeFighter, describeFighter, Her
                 <label className="field"><span>Senjata / perlengkapan</span><input value={hero.weapon} onChange={e => update(index, 'weapon', e.target.value)} /></label>
               </>}
             </div>
-            <HeroCard hero={hero} index={index} expanded={openFighter === index} onToggle={() => setOpenFighter(openFighter === index ? -1 : index)} onChange={(key, value) => update(index, key, value)} device={catalog.devices[hero.deviceIndex]} unifiedMotif={false} isRider={isRider} />
+            <HeroCard hero={hero} index={index} expanded={openFighter === index} onToggle={() => setOpenFighter(openFighter === index ? -1 : index)} onChange={(key, value) => update(index, key, value)} device={catalog.devices[hero.deviceIndex]} unifiedMotif={false} isRider={isRider} combatOnly />
           </section>
         })}
         <button className="generate-button" onClick={() => { setTab('image'); setNotice('Prompt duel diperbarui. Mulai dari Master Duel Reference untuk menjaga kedua desain konsisten.') }}><span><WandSparkles size={20} /> Buat Prompt Pertarungan</span><ArrowRight size={19} /></button>

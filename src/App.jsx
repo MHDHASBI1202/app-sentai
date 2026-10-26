@@ -823,7 +823,7 @@ function SelectField({ label, value, onChange, children }) {
   return <label className="field"><span>{label}</span><div className="select-wrap"><select value={value} onChange={(e) => onChange(e.target.value)}>{children}</select><ChevronDown size={15} /></div></label>
 }
 
-function HeroCard({ hero, index, expanded, onToggle, onChange, device, unifiedMotif, isRider }) {
+function HeroCard({ hero, index, expanded, onToggle, onChange, device, unifiedMotif, isRider, combatOnly = false }) {
   const aura = AURAS[hero.aura]
   const submotifs = MOTIFS[hero.motif] || []
   const female = isFeminineGender(hero.gender)
@@ -845,7 +845,7 @@ function HeroCard({ hero, index, expanded, onToggle, onChange, device, unifiedMo
           <SelectField label="Mata / visor helm" value={hero.eyes} onChange={v => onChange('eyes', v)}>{option(RIDER_EYES)}</SelectField>
           <SelectField label="Driver pribadi" value={hero.driver} onChange={v => onChange('driver', v)}>{option(RIDER_DEVICES.map(([n]) => n))}</SelectField>
           <SelectField label="Aksen armor pribadi" value={hero.riderAccent} onChange={v => onChange('riderAccent', v)}>{option(['Ikuti aksen seri', ...TEAM_ACCENT_FINISHES.map(([n]) => n)])}</SelectField>
-          <SelectField label="Finisher pribadi" value={hero.riderFinisher} onChange={v => onChange('riderFinisher', v)}>{option(RIDER_FINISHERS)}</SelectField>
+          {!combatOnly && <SelectField label="Finisher pribadi" value={hero.riderFinisher} onChange={v => onChange('riderFinisher', v)}>{option(RIDER_FINISHERS)}</SelectField>}
           <label className="field"><span>Form / wujud</span><input value={hero.form} onChange={e => onChange('form', e.target.value)} placeholder="Base / Upgrade / Final Form" /></label>
           <label className="field"><span>Senjata / perlengkapan</span><input value={hero.weapon} onChange={e => onChange('weapon', e.target.value)} /></label>
           <label className="field"><span>Ciri desain unik</span><input value={hero.riderDetail} onChange={e => onChange('riderDetail', e.target.value)} placeholder="Contoh: tanduk bercabang, bahu kiri besar" /></label>
@@ -863,9 +863,11 @@ function HeroCard({ hero, index, expanded, onToggle, onChange, device, unifiedMo
       </div>
       <label className="age-field"><span>Umur karakter <b>{hero.age} tahun</b></span><input type="range" min="10" max="50" value={hero.age} onChange={(e) => onChange('age', Number(e.target.value))} style={{ accentColor: aura[1] }} /><i>10</i><i>50</i></label>
       <div className="field-grid three">
-        <SelectField label="Gaya rambut" value={hero.hair} onChange={(v) => onChange('hair', v)}>{option(SELECTS.hair)}</SelectField>
-        <SelectField label="Outfit civilian — set lengkap" value={hero.outfit} onChange={(v) => onChange('outfit', v)}>{option(SELECTS.outfit)}</SelectField>
-        <SelectField label="Aksesori" value={hero.accessory} onChange={(v) => onChange('accessory', v)}>{option(SELECTS.accessory)}</SelectField>
+        {!combatOnly && <>
+          <SelectField label="Gaya rambut" value={hero.hair} onChange={(v) => onChange('hair', v)}>{option(SELECTS.hair)}</SelectField>
+          <SelectField label="Outfit civilian — set lengkap" value={hero.outfit} onChange={(v) => onChange('outfit', v)}>{option(SELECTS.outfit)}</SelectField>
+          <SelectField label="Aksesori" value={hero.accessory} onChange={(v) => onChange('accessory', v)}>{option(SELECTS.accessory)}</SelectField>
+        </>}
       </div>
       <div className="field-grid two">
         <SelectField label="Warna aura / energi" value={String(hero.aura)} onChange={(v) => onChange('aura', Number(v))}>{AURAS.map((a, i) => <option key={a[0]} value={i}>{a[0]}{AURA_LABELS[a[0]] ? ` (${AURA_LABELS[a[0]]})` : ''}</option>)}</SelectField>
