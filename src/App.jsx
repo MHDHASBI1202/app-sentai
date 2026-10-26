@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { RIDER_ROLES, RIDER_SERIES, RIDER_ARMORS, RIDER_EYES, RIDER_FINISHERS, RIDER_DEVICES, makeRider, buildRiderOutputs } from './rider'
+import { RIDER_ROLES, RIDER_SERIES, RIDER_SERIES_LABELS, RIDER_ARMORS, RIDER_EYES, RIDER_FINISHERS, RIDER_DEVICES, makeRider, buildRiderOutputs } from './rider'
 import {
   ArrowRight, Check, ChevronDown, Clipboard, Clapperboard, Copy, Film, Flame,
   Layers3, Plus, Settings2, Sparkles, WandSparkles, X,
@@ -1025,6 +1025,14 @@ function App({ initialCategory = 'sentai' }) {
   const [finisher, setFinisher] = useState(finishers[0])
 
   const updateHero = (id, key, value) => setHeroes((current) => current.map((h, i) => h.id === id ? { ...h, [key]: value, ...(key === 'motif' ? { submotif: MOTIFS[value]?.[i % MOTIFS[value].length] || '' } : {}) } : h))
+  const selectSeriesName = (value) => {
+    if (value === 'Kustom') {
+      setTeamNameMode('custom')
+      return
+    }
+    setTeamNameMode('preset')
+    setTeamName(value)
+  }
   const changeCount = (value) => {
     const count = Number(value)
     setCharacterCount(count)
@@ -1296,7 +1304,7 @@ function App({ initialCategory = 'sentai' }) {
             <SelectField label="Teriakan / Slogan Henshin" value={shoutMode === 'custom' ? 'Kustom' : shoutPreset} onChange={(v) => { if (v === 'Kustom') { setShoutMode('custom') } else { setShoutMode('preset'); setShoutPreset(v) } }}>{SHOUT_PRESETS.map((s) => <option key={s} value={s}>{s}</option>)}<option value="Kustom">Kustom (Ketik sendiri)</option></SelectField>
             {shoutMode === 'custom' && <label className="field"><span>Teks teriakan kustom</span><input value={customShout} onChange={(e) => setCustomShout(e.target.value)} placeholder="Contoh: Rawr! / Gao Access! / Morphin Time!" /></label>}
           </>}
-          <SelectField label={isRider ? 'Nama seri Rider' : 'Nama tim'} value={teamNameMode === 'custom' ? 'Kustom' : teamName} onChange={(v) => { if (v === 'Kustom') { setTeamNameMode('custom') } else { setTeamNameMode('preset'); setTeamName(v) } }}>{namePresets.map((n) => <option key={n} value={n}>{n}{LABELS[n] ? ` (${LABELS[n]})` : ''}</option>)}<option value="Kustom">Kustom (Buat sendiri)</option></SelectField>
+          <SelectField label={isRider ? 'Nama seri Rider' : 'Nama tim'} value={teamNameMode === 'custom' ? 'Kustom' : teamName} onChange={selectSeriesName}>{namePresets.map((n) => <option key={n} value={n}>{n}{(isRider ? RIDER_SERIES_LABELS[n] : LABELS[n]) ? ` (${isRider ? RIDER_SERIES_LABELS[n] : LABELS[n]})` : ''}</option>)}<option value="Kustom">Kustom (Buat sendiri)</option></SelectField>
           {teamNameMode === 'custom' && <label className="field"><span>{isRider ? 'Nama seri kustom' : 'Nama tim kustom'}</span><input value={teamName} onChange={(e) => setTeamName(e.target.value)} placeholder="Tulis nama tim sendiri..." /></label>}
           <SelectField label={isRider ? 'Arah desain seri' : 'Sistem kostum tim'} value={teamSuitSystem} onChange={setTeamSuitSystem}>{suitSystems.map(([label]) => <option key={label} value={label}>{label}{LABELS[label] ? ` (${LABELS[label]})` : ''}</option>)}</SelectField>
           <SelectField label={isRider ? 'Finishing aksen seri' : 'Finishing aksen tim'} value={teamAccentFinish} onChange={setTeamAccentFinish}>{TEAM_ACCENT_FINISHES.map(([label]) => <option key={label} value={label}>{label}{LABELS[label] ? ` (${LABELS[label]})` : ''}</option>)}</SelectField>

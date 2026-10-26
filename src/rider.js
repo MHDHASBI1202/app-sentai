@@ -1,5 +1,19 @@
 export const RIDER_ROLES = ['Main Rider', 'Secondary Rider', 'Third Rider', 'Fourth Rider', 'Fifth Rider', 'Sixth Rider', 'Seventh Rider', 'Eighth Rider', 'Ninth Rider', 'Tenth Rider', 'Extra Rider', 'Dark Rider', 'Movie Rider']
-export const RIDER_SERIES = ['Kamen Rider Asterion', 'Kamen Rider Veyron', 'Kamen Rider Luminary', 'Kamen Rider Nocturne', 'Kamen Rider Solstice']
+// Short concept names, following the direct thematic naming of existing series.
+export const RIDER_NAME_PRESETS = [
+  { name: 'Shift', reference: 'Drive', theme: 'kecepatan & mesin' },
+  { name: 'Forge', reference: 'Build', theme: 'kreasi & teknologi' },
+  { name: 'Rune', reference: 'Wizard', theme: 'sihir & simbol' },
+  { name: 'Fang', reference: 'Kiva', theme: 'taring & monster' },
+  { name: 'Crest', reference: 'Blade / Saber', theme: 'pedang & lambang ksatria' },
+  { name: 'Volt', reference: 'Stronger', theme: 'listrik & tenaga' },
+  { name: 'Pulse', reference: 'Hibiki', theme: 'irama & gelombang' },
+  { name: 'Byte', reference: 'Ex-Aid / Zero-One', theme: 'digital & sistem' },
+  { name: 'Stride', reference: 'Kabuto / Drive', theme: 'gerak & akselerasi' },
+  { name: 'Roar', reference: 'Ryuki / Revice', theme: 'naga & kekuatan hewan' },
+]
+export const RIDER_SERIES = RIDER_NAME_PRESETS.map(({ name }) => `Kamen Rider ${name}`)
+export const RIDER_SERIES_LABELS = Object.fromEntries(RIDER_NAME_PRESETS.map(({ name, reference, theme }) => [`Kamen Rider ${name}`, `${theme}; referensi ${reference}`]))
 export const RIDER_ARMORS = [
   ['Bio-organic carapace', 'layered insect-like carapace plates, ribbed flexible joints, an articulated chest exoskeleton'],
   ['Knight plated armor', 'angular knight breastplate, raised pauldrons, segmented gauntlets and armored greaves'],
@@ -20,7 +34,7 @@ export const RIDER_DEVICES = [
 
 export function makeRider(index) {
   return {
-    riderRole: RIDER_ROLES[index] || 'Extra Rider', riderName: ['Asterion', 'Veyron', 'Luminary', 'Nocturne', 'Solstice', 'Vesper', 'Cairn', 'Helion', 'Prismor', 'Argent'][index],
+    riderRole: RIDER_ROLES[index] || 'Extra Rider', riderName: RIDER_NAME_PRESETS[index]?.name || `Extra ${index + 1}`,
     armor: RIDER_ARMORS[index % RIDER_ARMORS.length][0], eyes: RIDER_EYES[index % RIDER_EYES.length],
     driver: RIDER_DEVICES[index % RIDER_DEVICES.length][0], riderAccent: 'Ikuti aksen seri',
     riderFinisher: RIDER_FINISHERS[index % RIDER_FINISHERS.length], weapon: ['Armored boots for kicking', 'Twin energy blades', 'Lance and shield', 'Compact blaster'][index % 4],

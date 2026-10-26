@@ -7,7 +7,7 @@ const makeFixture = (count) => Array.from({ length: count }, (_, i) => ({
   body: 'Atletis', coverage: 'Tertutup penuh', gender: 'Pria', age: 25, ethnicity: 'Jepang', hair: 'Pendek', accessory: 'Jam tangan',
 }))
 const produce = (heroes, mode, sequence, overrides = {}) => buildRiderOutputs({
-  heroes, mode, sequence, auras: [['Emerald', '#00ff00', 'green energy']], series: 'Kamen Rider Asterion',
+  heroes, mode, sequence, auras: [['Emerald', '#00ff00', 'green energy']], series: 'Kamen Rider Shift',
   aesthetic: 'Practical cinema', location: 'City', shout: 'Henshin!', suitSystem: 'Armored practical suits', accent: 'Brushed silver',
   chestMode: 'Tanpa logo di dada (Polos)', civilianOutfit: () => 'a complete jacket and trousers', feminineDetail: () => '', motifName: h => h.submotif,
   ...overrides,
