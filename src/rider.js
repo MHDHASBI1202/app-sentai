@@ -1,0 +1,71 @@
+export const RIDER_ROLES = ['Main Rider', 'Secondary Rider', 'Third Rider', 'Fourth Rider', 'Fifth Rider', 'Sixth Rider', 'Seventh Rider', 'Eighth Rider', 'Ninth Rider', 'Tenth Rider', 'Extra Rider', 'Dark Rider', 'Movie Rider']
+export const RIDER_SERIES = ['Kamen Rider Asterion', 'Kamen Rider Veyron', 'Kamen Rider Luminary', 'Kamen Rider Nocturne', 'Kamen Rider Solstice']
+export const RIDER_ARMORS = [
+  ['Bio-organic carapace', 'layered insect-like carapace plates, ribbed flexible joints, an articulated chest exoskeleton'],
+  ['Knight plated armor', 'angular knight breastplate, raised pauldrons, segmented gauntlets and armored greaves'],
+  ['Cybernetic reactor', 'mechanical chest reactor, circuit-lit hard-surface armor, exposed joint actuators'],
+  ['Asymmetric dual armor', 'asymmetric split-material chest armor, contrasting shoulder silhouettes and offset forearm plates'],
+  ['Tactical reinforced', 'compact ballistic chest plates, reinforced shoulder guards, modular armored boots'],
+  ['Mystic relic armor', 'engraved relic plates, sculpted chest sigils, layered ceremonial shoulder armor'],
+]
+export const RIDER_EYES = ['Compound insect eyes', 'Angular luminous eyes', 'Round retro compound eyes', 'Split asymmetric eyes', 'Crystal faceted eyes']
+export const RIDER_FINISHERS = ['Rider Kick', 'Rider Punch', 'Weapon Slash', 'Charged Projectile', 'Aerial Dive Kick']
+export const RIDER_DEVICES = [
+  ['Core Driver', 'a waist-mounted transformation belt; insert a personal core and rotate its locking ring'],
+  ['Card Driver', 'a waist-mounted belt with a card scanner; scan a personal card and pull the side lever'],
+  ['Twin-key Driver', 'a waist-mounted belt; insert two keys and turn both outward'],
+  ['Relic Driver', 'a waist-mounted belt with a relic socket; seat the personal relic and press its crest'],
+  ['Dial Driver', 'a waist-mounted belt; rotate the mechanical dial and press the release trigger'],
+]
+
+export function makeRider(index) {
+  return {
+    riderRole: RIDER_ROLES[index] || 'Extra Rider', riderName: ['Asterion', 'Veyron', 'Luminary', 'Nocturne', 'Solstice', 'Vesper', 'Cairn', 'Helion', 'Prismor', 'Argent'][index],
+    armor: RIDER_ARMORS[index % RIDER_ARMORS.length][0], eyes: RIDER_EYES[index % RIDER_EYES.length],
+    driver: RIDER_DEVICES[index % RIDER_DEVICES.length][0], riderAccent: 'Ikuti aksen seri',
+    riderFinisher: RIDER_FINISHERS[index % RIDER_FINISHERS.length], weapon: ['Armored boots for kicking', 'Twin energy blades', 'Lance and shield', 'Compact blaster'][index % 4],
+    form: 'Base Form', riderDetail: '',
+  }
+}
+
+export function buildRiderOutputs({ heroes, auras, series, mode, sequence, aesthetic, location, shout, suitSystem, accent, chestMode, civilianOutfit, feminineDetail, motifName }) {
+  const clean = (value) => String(value || '').replaceAll('"', '')
+  const name = (h) => `Kamen Rider ${clean(h.riderName || h.name)}`
+  const personalAccent = (h) => h.riderAccent === 'Ikuti aksen seri' ? accent : h.riderAccent || accent
+  const scene = `${location}; ${aesthetic}. Hyperrealistic live-action tokusatsu, practical painted armor and flexible joints, natural anatomy, cinematic lighting, 4k.`
+  const driver = (h) => { const d = RIDER_DEVICES.find(([n]) => n === h.driver) || RIDER_DEVICES[0]; return `${d[0]}: ${d[1]}` }
+  const lock = (h) => `${name(h)} (${h.riderRole}), civilian identity ${clean(h.name)}, ${h.form}. ${auras[h.aura][0]} primary armor; ${personalAccent(h)} accent finish. ${RIDER_ARMORS.find(([n]) => n === h.armor)?.[1] || RIDER_ARMORS[0][1]}. Helmet: ${h.eyes}, a unique ${motifName(h)} crest, individual jaw guard and antenna geometry. Motif: ${motifName(h)}. ${h.body} build; coverage: ${h.coverage}. ${h.gender.toLowerCase().includes('wanita') ? feminineDetail(h).replaceAll('spandex', 'flexible armored undersuit').replaceAll('minimal armor', 'articulated armor') : ''} Weapon: ${clean(h.weapon)}. ${driver(h)}. Finisher: ${h.riderFinisher}. ${clean(h.riderDetail)}.`
+  const bible = `RIDER DESIGN LOCK — ${clean(series)}. Series direction: ${suitSystem}; default accent ${accent}. Each Rider has their own armor architecture, helmet silhouette, eyes, proportions, palette and Driver housing; roles indicate narrative position, not recolors or power ranking. Preserve each Rider's exact personal design across references, storyboards and video. Chest emblem placement: ${chestMode}. Original fictional designs and emblems. `
+  const roster = heroes.map(lock).join('\n')
+  const cref = `[ATTACH 'MASTER RIDER REFERENCE' AS CREF] ${bible}`
+  const item = (id, kind, title, text) => ({ id, kind, title, text })
+  const civilian = (h) => `${clean(h.name)}, ${h.age}-year-old ${h.gender}, ${h.ethnicity} heritage, ${h.body} build, ${h.hair}; wearing ${civilianOutfit(h)}, accessory ${h.accessory}`
+  const shoutText = shout === 'Tanpa teriakan (Hening)' ? 'Transform in focused silence.' : `Shout "${clean(shout)}".`
+  const action = (h) => mode === 'Henshin'
+    ? `${civilian(h)}. ${shoutText} Activate ${driver(h)}. ${auras[h.aura][2]} surrounds the body; articulated ${h.armor} plates assemble from boots to chest, then the ${h.eyes} helmet closes. Finish with an individual combat stance. ${lock(h)}`
+    : `${name(h)} activates ${driver(h)}, charges ${auras[h.aura][2]}, and executes ${h.riderFinisher} using ${clean(h.weapon)}. ${h.riderFinisher.includes('Kick') ? 'Leap, extend the armored striking leg, connect with an energy impact, then land in a low stance.' : 'Wind up, release the personal strike, then settle into a victory stance.'} ${lock(h)}`
+  const groupAction = (list) => list.map(action).join('\n')
+  const image = [
+    item('rider-master', 'IMAGE • RIDER CONTINUITY', `${series} — Master Rider Reference`, `Full-body lineup of exactly ${heroes.length} distinct armored Riders, separate silhouettes, each labeled by identity and role. ${bible}\n${roster}\nFront view, boots and Drivers visible. ${scene}`),
+    item('rider-lineup', 'IMAGE • RIDER LINEUP', `${series} — Rider Assembly`, `${cref} Cinematic ${heroes.length}-Rider assembly, each in an individual combat stance, staggered composition with separated armor silhouettes.\n${roster}\nPractical sparks and colored smoke. ${scene} 16:9.`),
+    item('rider-logo', 'IMAGE • SERIES LOGO', `${series} — Emblem / Crest`, `Original fictional series logo for "${clean(series)}", inspired by ${motifName(heroes[0])}. Angular metallic lettering, sculpted emblem, ${heroes.map(h => auras[h.aura][0]).join(', ')} accents, black background, centered prop product photo. No existing franchise logo. 4k.`),
+    ...heroes.flatMap(h => [
+      item(`human-${h.id}`, 'IMAGE • HUMAN FORM', `${h.name} — Civilian Reference`, `Full-body civilian reference: ${civilian(h)}. Holding the personal transformation component for ${driver(h)}. ${scene}`),
+      item(`hero-${h.id}`, 'IMAGE • HERO FORM', `${name(h)} — ${h.riderRole}`, `${cref} Full-body armored hero reference, individual battle-ready stance, boots visible. ${lock(h)} ${scene}`),
+      item(`sheet-${h.id}`, 'IMAGE • CHARACTER SHEET 9:16', `${name(h)} — Character Sheet`, `${cref} White background, 2 columns (civilian and armored Rider), 5 rows (front, three-quarter, side, back, face / helmet detail), labeled panels. Civilian: ${civilian(h)}. Armor: ${lock(h)} Even studio lighting. ${scene} 9:16.`),
+      item(`driver-${h.id}`, 'IMAGE • PROP MACRO', `${name(h)} — ${h.driver}`, `Personal transformation prop product photo. ${lock(h)} Focus only on ${driver(h)}, its personal ${motifName(h)} component, ${personalAccent(h)} trim, tactile controls, painted ABS, metal and translucent resin. Dark tabletop, rim light, shallow depth of field, 4k.`),
+    ]),
+  ]
+  const groups = sequence === 'Solo' ? heroes.map(h => [h]) : [heroes]
+  const video = []
+  groups.forEach((list, i) => {
+    const title = list.length === 1 ? name(list[0]) : `${series} — ${list.length} Riders`
+    const panels = mode === 'Henshin'
+      ? '1: civilian stance; 2: close-up of each personal Driver activation; 3: individual energy motif; 4: segmented armor assembles; 5: personal helmet and eyes lock; 6: completed Rider combat stance.'
+      : '1: armored battle stance; 2: each personal Driver charges; 3: personal aura gathers; 4: wind-up for each personal finisher; 5: distinct finishing strikes impact; 6: landing and victory stance.'
+    image.push(item(`rider-story-${i}`, 'IMAGE • STORYBOARD 3:2', `${title} — ${mode} Storyboard`, `${cref} Strict 2 columns × 3 rows, six equal numbered panels, thin white gutters. ${panels}\n${groupAction(list)}\n${scene} 3:2.`))
+    video.push(item(`rider-video-${i}`, 'VIDEO • CINEMATIC PROMPT', `${title} — ${mode}`, `${cref} ${groupAction(list)}\nCamera: close-up Driver trigger, tracking action, low-angle wide final stance. ${scene} Practical VFX, 8s, 16:9.`))
+  })
+  video.push(item('rider-assembly-video', 'VIDEO • RIDER ASSEMBLY', `${series} — Rider Assembly Sequence`, `${cref} ${roster}\nEach Rider steps into frame and takes a distinct combat stance. Announce individual Rider identities in sequence. Practical sparks and drifting smoke. Camera tracks across each unique helmet and armor, pulls back to show exactly ${heroes.length} Riders. ${scene} 8s, 16:9.`))
+  return { image, video, seo: [item('rider-seo', 'PRODUCTION • SEO', 'Metadata Produksi', `Title: ${series} — ${mode} ${sequence}\nDescription: Original armored Rider concept at ${location}, ${aesthetic}.\nCast: ${heroes.map(h => `${name(h)} (${h.riderRole})`).join(', ')}\nKeywords: kamen rider inspired, tokusatsu, armored hero, transformation driver, ${mode.toLowerCase()}, practical armor, ${heroes.map(motifName).join(', ')}.\nOriginal fictional characters.`)] }
+}

@@ -4,6 +4,7 @@
   "description": "",
   "type": "module",
   "scripts": {
+    "test": "node --test src/rider.test.js && node check-render.mjs",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",

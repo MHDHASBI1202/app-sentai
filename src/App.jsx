@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { RIDER_ROLES, RIDER_SERIES, RIDER_ARMORS, RIDER_EYES, RIDER_FINISHERS, RIDER_DEVICES, makeRider, buildRiderOutputs } from './rider'
 import {
   ArrowRight, Check, ChevronDown, Clipboard, Clapperboard, Copy, Film, Flame,
   Layers3, Plus, Settings2, Sparkles, WandSparkles, X,
@@ -903,7 +904,7 @@ function SelectField({ label, value, onChange, children }) {
   return <label className="field"><span>{label}</span><div className="select-wrap"><select value={value} onChange={(e) => onChange(e.target.value)}>{children}</select><ChevronDown size={15} /></div></label>
 }
 
-function HeroCard({ hero, index, expanded, onToggle, onChange, device, unifiedMotif }) {
+function HeroCard({ hero, index, expanded, onToggle, onChange, device, unifiedMotif, isRider }) {
   const aura = AURAS[hero.aura]
   const submotifs = MOTIFS[hero.motif] || []
   const female = isFeminineGender(hero.gender)
@@ -911,14 +912,27 @@ function HeroCard({ hero, index, expanded, onToggle, onChange, device, unifiedMo
     <button className="hero-summary" onClick={onToggle} aria-expanded={expanded}>
       <span className="hero-index">{String(index + 1).padStart(2, '0')}</span>
       <span className="hero-dot" style={{ background: aura[1] }} />
-      <span className="hero-summary-name"><b>{hero.name || `Hero ${index + 1}`}</b><small>{aura[0]}{hero.role === 'Sixth Ranger' ? ' · ⚡ 6th Ranger' : ''}</small></span>
+      <span className="hero-summary-name"><b>{isRider ? `Kamen Rider ${hero.riderName || hero.name}` : hero.name || `Hero ${index + 1}`}</b><small>{aura[0]}{isRider ? ` · ${hero.riderRole}` : hero.role === 'Sixth Ranger' ? ' · ⚡ 6th Ranger' : ''}</small></span>
       <span className="hero-form-label">{female ? 'Feminine suit logic' : 'Hero suit logic'}</span>
       <ChevronDown size={18} className={expanded ? 'rotate' : ''} />
     </button>
     {expanded && <div className="hero-fields">
       <div className="hero-name-row"><label className="field grow"><span>Nama panggilan</span><input value={hero.name} onChange={(e) => onChange('name', e.target.value)} placeholder={`Hero ${index + 1}`} /></label><div className="aura-chip" style={{ color: aura[1] }}><span style={{ background: aura[1] }} />{aura[0]}</div></div>
-      <div className="segmented slim" style={{ marginTop: 13 }}><button className={hero.role === 'Main Team' ? 'active' : ''} onClick={() => onChange('role', 'Main Team')}>Main Team</button><button className={hero.role === 'Sixth Ranger' ? 'active rose' : ''} onClick={() => onChange('role', 'Sixth Ranger')}>⚡ Sixth Ranger</button></div>
-      {hero.role === 'Sixth Ranger' && <div className="feminine-design" style={{ borderColor: 'color-mix(in srgb, var(--hero) 28%, #3a2940)', background: 'linear-gradient(110deg,color-mix(in srgb, var(--hero) 5%, #140c1c),#0c141c)' }}>
+      {isRider ? <div className="rider-identity">
+        <div className="field-grid two">
+          <label className="field"><span>Nama Rider</span><input value={hero.riderName} onChange={e => onChange('riderName', e.target.value)} placeholder="Nama setelah Kamen Rider" /></label>
+          <SelectField label="Peran Rider" value={hero.riderRole} onChange={v => onChange('riderRole', v)}>{option(RIDER_ROLES)}</SelectField>
+          <SelectField label="Arsitektur armor pribadi" value={hero.armor} onChange={v => onChange('armor', v)}>{option(RIDER_ARMORS.map(([n]) => n))}</SelectField>
+          <SelectField label="Mata / visor helm" value={hero.eyes} onChange={v => onChange('eyes', v)}>{option(RIDER_EYES)}</SelectField>
+          <SelectField label="Driver pribadi" value={hero.driver} onChange={v => onChange('driver', v)}>{option(RIDER_DEVICES.map(([n]) => n))}</SelectField>
+          <SelectField label="Aksen armor pribadi" value={hero.riderAccent} onChange={v => onChange('riderAccent', v)}>{option(['Ikuti aksen seri', ...TEAM_ACCENT_FINISHES.map(([n]) => n)])}</SelectField>
+          <SelectField label="Finisher pribadi" value={hero.riderFinisher} onChange={v => onChange('riderFinisher', v)}>{option(RIDER_FINISHERS)}</SelectField>
+          <label className="field"><span>Form / wujud</span><input value={hero.form} onChange={e => onChange('form', e.target.value)} placeholder="Base / Upgrade / Final Form" /></label>
+          <label className="field"><span>Senjata / perlengkapan</span><input value={hero.weapon} onChange={e => onChange('weapon', e.target.value)} /></label>
+          <label className="field"><span>Ciri desain unik</span><input value={hero.riderDetail} onChange={e => onChange('riderDetail', e.target.value)} placeholder="Contoh: tanduk bercabang, bahu kiri besar" /></label>
+        </div><p className="profile-note">Setiap Rider punya desain sendiri. Peran Main, Secondary, dan seterusnya bukan aturan warna atau tingkat kekuatan.</p>
+      </div> : <div className="segmented slim" style={{ marginTop: 13 }}><button className={hero.role === 'Main Team' ? 'active' : ''} onClick={() => onChange('role', 'Main Team')}>Main Team</button><button className={hero.role === 'Sixth Ranger' ? 'active rose' : ''} onClick={() => onChange('role', 'Sixth Ranger')}>⚡ Sixth Ranger</button></div>}
+      {!isRider && hero.role === 'Sixth Ranger' && <div className="feminine-design" style={{ borderColor: 'color-mix(in srgb, var(--hero) 28%, #3a2940)', background: 'linear-gradient(110deg,color-mix(in srgb, var(--hero) 5%, #140c1c),#0c141c)' }}>
         <div className="field-grid two"><SelectField label="Gaya sixth ranger" value={hero.sixthStyle} onChange={(v) => onChange('sixthStyle', v)}>{SIXTH_RANGER_STYLES.map(([label]) => <option key={label}>{label}</option>)}</SelectField>
         {(hero.sixthStyle === 'Aksen warna berbeda' || hero.sixthStyle === 'Armor + aksen unik' || hero.sixthStyle === 'Kombinasi lengkap') && <SelectField label="Warna aksen eksklusif" value={hero.sixthAccent} onChange={(v) => onChange('sixthAccent', v)}>{SIXTH_RANGER_ACCENTS.map(([label]) => <option key={label}>{label}</option>)}</SelectField>}</div>
         <p style={{ margin: '8px 0 0', color: '#7f979f', fontSize: 10, lineHeight: 1.45 }}>⚡ {SIXTH_RANGER_STYLES.find(([l]) => l === hero.sixthStyle)?.[1]?.slice(0, 120) || ''}…</p>
@@ -936,7 +950,7 @@ function HeroCard({ hero, index, expanded, onToggle, onChange, device, unifiedMo
       </div>
       <div className="field-grid two">
         <SelectField label="Warna aura / energi" value={String(hero.aura)} onChange={(v) => onChange('aura', Number(v))}>{AURAS.map((a, i) => <option key={a[0]} value={i}>{a[0]}{AURA_LABELS[a[0]] ? ` (${AURA_LABELS[a[0]]})` : ''}</option>)}</SelectField>
-        <SelectField label="Suit coverage" value={hero.coverage} onChange={(v) => onChange('coverage', v)}>{option(SELECTS.coverage)}</SelectField>
+        <SelectField label="Suit coverage" value={hero.coverage} onChange={(v) => onChange('coverage', v)}>{SELECTS.coverage.map(v => <option key={v} value={v}>{v}{!isRider && LABELS[v] ? ` (${LABELS[v]})` : ''}</option>)}</SelectField>
       </div>
       {female && <div className="feminine-design">
         <SelectField label="Desain kostum feminin" value={hero.feminineDesign} onChange={(v) => onChange('feminineDesign', v)}>{FEMININE_SUIT_DESIGNS.map(([label]) => <option key={label}>{label}</option>)}</SelectField>
@@ -945,10 +959,10 @@ function HeroCard({ hero, index, expanded, onToggle, onChange, device, unifiedMo
       <p className="aura-description"><Sparkles size={13} /> {aura[2]}</p>
       <div className="motif-block">
         <div className={`field-grid ${unifiedMotif ? 'one' : 'two'}`}>
-          {!unifiedMotif && <SelectField label="Motif kostum spandex" value={hero.motif} onChange={(v) => onChange('motif', v)}>{[...Object.keys(MOTIFS), 'Kustom'].map((m) => <option key={m} value={m}>{m}{LABELS[m] ? ` (${LABELS[m]})` : ''}</option>)}</SelectField>}
+          {!unifiedMotif && <SelectField label={isRider ? 'Motif armor Rider' : 'Motif kostum spandex'} value={hero.motif} onChange={(v) => onChange('motif', v)}>{[...Object.keys(MOTIFS), 'Kustom'].map((m) => <option key={m} value={m}>{m}{LABELS[m] ? ` (${LABELS[m]})` : ''}</option>)}</SelectField>}
           {hero.motif !== 'Kustom' ? <SelectField label={unifiedMotif ? `Sub-motif (${hero.motif})` : "Sub-motif"} value={hero.submotif} onChange={(v) => onChange('submotif', v)}>{option(submotifs)}</SelectField> : <label className="field"><span>Motif kustom</span><input value={hero.customMotif} onChange={(e) => onChange('customMotif', e.target.value)} placeholder="Contoh: urban thunderbird" /></label>}
         </div>
-        <small><WandSparkles size={13} /> Alat: {device[0].toLowerCase()}</small>
+        <small><WandSparkles size={13} /> Alat: {isRider ? hero.driver : device[0].toLowerCase()}</small>
       </div>
     </div>}
   </section>
@@ -968,32 +982,43 @@ function OutputCard({ item, copied, onCopy }) {
 
 const CHEST_EMBLEM_OPTIONS = ['Keduanya (Logo tim & Motif)', 'Hanya Logo Tim (Kiri dada)', 'Hanya Motif Hero (Tengah dada)', 'Tanpa logo di dada (Polos)']
 
-function App() {
-  const [mode, setMode] = useState('Henshin')
-  const [sequence, setSequence] = useState('Bersama')
-  const [aesthetic, setAesthetic] = useState(AESTHETICS[0])
-  const [location, setLocation] = useState(LOCATIONS[1])
-  const [deviceIndex, setDeviceIndex] = useState(0)
-  const [shoutMode, setShoutMode] = useState('preset')
-  const [shoutPreset, setShoutPreset] = useState(SHOUT_PRESETS[0])
-  const [customShout, setCustomShout] = useState('')
-  const [teamNameMode, setTeamNameMode] = useState('preset')
-  const [teamName, setTeamName] = useState(TEAM_NAME_PRESETS[0])
-  const [teamSuitSystem, setTeamSuitSystem] = useState(TEAM_SUIT_SYSTEMS[0][0])
-  const [teamAccentFinish, setTeamAccentFinish] = useState(TEAM_ACCENT_FINISHES[0][0])
-  const [chestEmblemMode, setChestEmblemMode] = useState(CHEST_EMBLEM_OPTIONS[0])
-  const [characterCount, setCharacterCount] = useState(6)
-  const [unifiedMotif, setUnifiedMotif] = useState(true)
-  const [heroes, setHeroes] = useState(() => [makeHero(0), makeHero(1), makeHero(2), makeHero(3), makeHero(4), makeHero(5)])
-  const [openHero, setOpenHero] = useState(0)
-  const [tab, setTab] = useState('image')
-  const [copied, setCopied] = useState('')
-  const [notice, setNotice] = useState('Prompt siap disusun dari set produksi Anda.')
+function useProfileState(isRider, sentaiInitial, riderInitial = sentaiInitial) {
+  const [profiles, setProfiles] = useState(() => ({ sentai: typeof sentaiInitial === 'function' ? sentaiInitial() : sentaiInitial, rider: typeof riderInitial === 'function' ? riderInitial() : riderInitial }))
+  const key = isRider ? 'rider' : 'sentai'
+  return [profiles[key], (value) => setProfiles(current => ({ ...current, [key]: typeof value === 'function' ? value(current[key]) : value }))]
+}
+
+function App({ initialCategory = 'sentai' }) {
+  const [category, setCategory] = useState(initialCategory)
+  const isRider = category === 'rider'
+  const makeCharacter = (i) => isRider ? { ...makeHero(i), ...makeRider(i), motif: 'Insect', submotif: MOTIFS.Insect[i % MOTIFS.Insect.length] } : makeHero(i)
+  const [mode, setMode] = useProfileState(isRider, 'Henshin')
+  const [sequence, setSequence] = useProfileState(isRider, 'Bersama')
+  const [aesthetic, setAesthetic] = useProfileState(isRider, AESTHETICS[0])
+  const [location, setLocation] = useProfileState(isRider, LOCATIONS[1])
+  const [deviceIndex, setDeviceIndex] = useProfileState(isRider, 0)
+  const [shoutMode, setShoutMode] = useProfileState(isRider, 'preset')
+  const [shoutPreset, setShoutPreset] = useProfileState(isRider, SHOUT_PRESETS[0], 'Henshin!')
+  const [customShout, setCustomShout] = useProfileState(isRider, '')
+  const [teamNameMode, setTeamNameMode] = useProfileState(isRider, 'preset')
+  const [teamName, setTeamName] = useProfileState(isRider, TEAM_NAME_PRESETS[0], RIDER_SERIES[0])
+  const [teamSuitSystem, setTeamSuitSystem] = useProfileState(isRider, TEAM_SUIT_SYSTEMS[0][0], RIDER_ARMORS[0][0])
+  const [teamAccentFinish, setTeamAccentFinish] = useProfileState(isRider, TEAM_ACCENT_FINISHES[0][0])
+  const [chestEmblemMode, setChestEmblemMode] = useProfileState(isRider, CHEST_EMBLEM_OPTIONS[0])
+  const [characterCount, setCharacterCount] = useProfileState(isRider, 6, 4)
+  const [unifiedMotif, setUnifiedMotif] = useProfileState(isRider, true, false)
+  const [heroes, setHeroes] = useProfileState(isRider, () => Array.from({ length: 6 }, (_, i) => makeHero(i)), () => Array.from({ length: 4 }, (_, i) => ({ ...makeHero(i), ...makeRider(i), motif: 'Insect', submotif: MOTIFS.Insect[i % MOTIFS.Insect.length] })))
+  const [openHero, setOpenHero] = useProfileState(isRider, 0)
+  const [tab, setTab] = useProfileState(isRider, 'image')
+  const [copied, setCopied] = useProfileState(isRider, '')
+  const [notice, setNotice] = useProfileState(isRider, 'Prompt siap disusun dari set produksi Anda.')
 
   const activeHeroes = heroes.slice(0, characterCount)
   const device = DEVICES[deviceIndex]
   const resolvedShout = shoutMode === 'custom' ? (customShout.trim() || 'Henshin!') : shoutPreset
-  const sharedSuitSystem = TEAM_SUIT_SYSTEMS.find(([label]) => label === teamSuitSystem)?.[1] ?? TEAM_SUIT_SYSTEMS[0][1]
+  const suitSystems = isRider ? RIDER_ARMORS : TEAM_SUIT_SYSTEMS
+  const namePresets = isRider ? RIDER_SERIES : TEAM_NAME_PRESETS
+  const sharedSuitSystem = suitSystems.find(([label]) => label === teamSuitSystem)?.[1] ?? TEAM_SUIT_SYSTEMS[0][1]
   const sharedAccentFinish = TEAM_ACCENT_FINISHES.find(([label]) => label === teamAccentFinish)?.[1] ?? TEAM_ACCENT_FINISHES[0][1]
   const teamMotif = activeHeroes[0]?.motif || 'Mythical beast'
   const finishers = FINISHERS[teamMotif] || FINISHERS.default
@@ -1005,7 +1030,14 @@ function App() {
     setCharacterCount(count)
     setHeroes((current) => {
       const next = [...current]
-      while (next.length < count) next.push(makeHero(next.length))
+      while (next.length < count) {
+        const hero = makeCharacter(next.length)
+        if (unifiedMotif && next[0]) {
+          hero.motif = next[0].motif
+          hero.submotif = MOTIFS[hero.motif]?.[next.length % MOTIFS[hero.motif].length] || ''
+        }
+        next.push(hero)
+      }
       return next
     })
     setOpenHero(Math.min(openHero, count - 1))
@@ -1033,6 +1065,7 @@ function App() {
   }
 
   const outputs = useMemo(() => {
+    if (isRider) return buildRiderOutputs({ heroes: activeHeroes, auras: AURAS, series: teamName, mode, sequence, aesthetic, location, shout: resolvedShout, suitSystem: sharedSuitSystem, accent: teamAccentFinish, chestMode: chestEmblemMode, civilianOutfit: civilianOutfitDetail, feminineDetail: feminineDesignName, motifName: h => h.motif === 'Kustom' ? (h.customMotif || 'original custom motif') : `${h.submotif} ${h.motif}` })
     const realism = 'hyperrealistic live-action photography, natural human anatomy, practical tokusatsu suit materials, cinematic lighting, 4k film still'
     const resolvedTeamName = safe(teamName.trim() || 'Sentai Aegis')
     const teamRoster = activeHeroes.map((h, index) => `${index + 1}. ${safe(h.name)} — ${AURAS[h.aura][0]} primary color, ${motifSubName(h)} ${motifName(h)} motif${h.role === 'Sixth Ranger' ? ' [SIXTH RANGER]' : ''}`).join(' | ')
@@ -1231,7 +1264,7 @@ function App() {
     const videoOutputs = sequence === 'Solo' ? [...soloVideoPrompts, videoRollCall] : [videoMain, videoRollCall]
     const seo = { id: 'seo', kind: 'PRODUCTION • SEO', title: 'Metadata Produksi', text: `Title: ${mode} ${sequence} — ${activeHeroes.map((h) => h.name).join(', ')}\nDescription: Hyperrealistic live-action tokusatsu scene in ${location}, styled as ${aesthetic}.\nKeywords: tokusatsu, super sentai inspired, live action superhero, practical spandex suit, cinematic henshin, ${teamMotif.toLowerCase()}, hyperrealistic video.\nSafety intent: original fictional characters.` }
     return { image: [teamReference, teamRollCall, teamLogo, ...sheets, macro, ...storyboardItems], video: videoOutputs, seo: [seo] }
-  }, [activeHeroes, aesthetic, device, finisher, location, mode, sequence, sharedAccentFinish, sharedSuitSystem, teamMotif, teamName, chestEmblemMode, resolvedShout])
+  }, [isRider, teamAccentFinish, activeHeroes, aesthetic, device, finisher, location, mode, sequence, sharedAccentFinish, sharedSuitSystem, teamMotif, teamName, chestEmblemMode, resolvedShout])
 
   const generate = () => { setNotice(`Prompt ${mode.toLowerCase()} untuk ${activeHeroes.length} karakter telah diperbarui.`); setTab('image') }
   const currentOutputs = outputs[tab]
@@ -1239,33 +1272,38 @@ function App() {
   return <main className="app-shell">
     <header className="topbar">
       <a className="brand" href="#top" aria-label="Sentai Forge home"><span className="brand-mark"><span /><span /><span /></span><span>SENTAI <em>FORGE</em></span></a>
-      <div className="project-status"><span className="pulse" />Project · Hyperrealistic Sentai</div>
+      <div className="project-status"><span className="pulse" />Project · Hyperrealistic {isRider ? 'Kamen Rider' : 'Super Sentai'}</div>
       <button className="settings-button"><Settings2 size={17} /> Pengaturan</button>
     </header>
     <div className="workspace" id="top">
       <aside className="left-pane">
         <div className="pane-title"><span className="pane-icon"><Settings2 size={18} /></span><div><p>CONTROL DECK</p><h1>Production Settings</h1></div></div>
+        <section className="category-control" aria-label="Kategori pahlawan">
+          <span className="section-label">Semesta pahlawan</span>
+          <div className="segmented"><button aria-pressed={!isRider} className={!isRider ? 'active' : ''} onClick={() => setCategory('sentai')}>Super Sentai</button><button aria-pressed={isRider} className={isRider ? 'active' : ''} onClick={() => setCategory('rider')}>Kamen Rider</button></div>
+          <p className="profile-note">{isRider ? 'Pahlawan berarmor dengan identitas, Driver, dan form unik untuk setiap Rider.' : 'Tim pahlawan dengan desain kostum seragam dan variasi Sixth Ranger.'} Pengaturan tiap kategori tersimpan selama sesi ini.</p>
+        </section>
         <section className="mode-control">
           <span className="section-label">Kategori adegan</span>
           <div className="segmented"><button className={mode === 'Henshin' ? 'active' : ''} onClick={() => setMode('Henshin')}><Sparkles size={17} /> Henshin</button><button className={mode === 'Finisher' ? 'active rose' : ''} onClick={() => setMode('Finisher')}><Flame size={17} /> Finisher</button></div>
           <div className="segmented slim"><button className={sequence === 'Bersama' ? 'active' : ''} onClick={() => setSequence('Bersama')}>Bersama</button><button className={sequence === 'Solo' ? 'active' : ''} onClick={() => setSequence('Solo')}>Solo / per hero</button></div>
         </section>
         <section className="settings-grid">
-          <SelectField label="Estetika visual" value={aesthetic} onChange={setAesthetic}>{option(AESTHETICS)}</SelectField>
+          <SelectField label="Estetika visual" value={aesthetic} onChange={setAesthetic}>{option(isRider ? AESTHETICS.map(a => a === 'Super Sentai Pop 2000-an' ? 'Kamen Rider Techno 2000-an' : a) : AESTHETICS)}</SelectField>
           <SelectField label="Latar tempat" value={location} onChange={setLocation}>{option(LOCATIONS)}</SelectField>
-          <SelectField label="Alat henshin" value={String(deviceIndex)} onChange={(v) => setDeviceIndex(Number(v))}>{DEVICES.map((d, i) => <option value={i} key={d[0]}>{d[0]}</option>)}</SelectField>
+          {!isRider && <SelectField label="Alat henshin" value={String(deviceIndex)} onChange={(v) => setDeviceIndex(Number(v))}>{DEVICES.map((d, i) => <option value={i} key={d[0]}>{d[0]}</option>)}</SelectField>}
           {mode === 'Henshin' && <>
             <SelectField label="Teriakan / Slogan Henshin" value={shoutMode === 'custom' ? 'Kustom' : shoutPreset} onChange={(v) => { if (v === 'Kustom') { setShoutMode('custom') } else { setShoutMode('preset'); setShoutPreset(v) } }}>{SHOUT_PRESETS.map((s) => <option key={s} value={s}>{s}</option>)}<option value="Kustom">Kustom (Ketik sendiri)</option></SelectField>
             {shoutMode === 'custom' && <label className="field"><span>Teks teriakan kustom</span><input value={customShout} onChange={(e) => setCustomShout(e.target.value)} placeholder="Contoh: Rawr! / Gao Access! / Morphin Time!" /></label>}
           </>}
-          <SelectField label="Nama tim" value={teamNameMode === 'custom' ? 'Kustom' : teamName} onChange={(v) => { if (v === 'Kustom') { setTeamNameMode('custom') } else { setTeamNameMode('preset'); setTeamName(v) } }}>{TEAM_NAME_PRESETS.map((n) => <option key={n} value={n}>{n}{LABELS[n] ? ` (${LABELS[n]})` : ''}</option>)}<option value="Kustom">Kustom (Buat sendiri)</option></SelectField>
-          {teamNameMode === 'custom' && <label className="field"><span>Nama tim kustom</span><input value={teamName} onChange={(e) => setTeamName(e.target.value)} placeholder="Tulis nama tim sendiri..." /></label>}
-          <SelectField label="Sistem kostum tim" value={teamSuitSystem} onChange={setTeamSuitSystem}>{TEAM_SUIT_SYSTEMS.map(([label]) => <option key={label} value={label}>{label}{LABELS[label] ? ` (${LABELS[label]})` : ''}</option>)}</SelectField>
-          <SelectField label="Finishing aksen tim" value={teamAccentFinish} onChange={setTeamAccentFinish}>{TEAM_ACCENT_FINISHES.map(([label]) => <option key={label} value={label}>{label}{LABELS[label] ? ` (${LABELS[label]})` : ''}</option>)}</SelectField>
+          <SelectField label={isRider ? 'Nama seri Rider' : 'Nama tim'} value={teamNameMode === 'custom' ? 'Kustom' : teamName} onChange={(v) => { if (v === 'Kustom') { setTeamNameMode('custom') } else { setTeamNameMode('preset'); setTeamName(v) } }}>{namePresets.map((n) => <option key={n} value={n}>{n}{LABELS[n] ? ` (${LABELS[n]})` : ''}</option>)}<option value="Kustom">Kustom (Buat sendiri)</option></SelectField>
+          {teamNameMode === 'custom' && <label className="field"><span>{isRider ? 'Nama seri kustom' : 'Nama tim kustom'}</span><input value={teamName} onChange={(e) => setTeamName(e.target.value)} placeholder="Tulis nama tim sendiri..." /></label>}
+          <SelectField label={isRider ? 'Arah desain seri' : 'Sistem kostum tim'} value={teamSuitSystem} onChange={setTeamSuitSystem}>{suitSystems.map(([label]) => <option key={label} value={label}>{label}{LABELS[label] ? ` (${LABELS[label]})` : ''}</option>)}</SelectField>
+          <SelectField label={isRider ? 'Finishing aksen seri' : 'Finishing aksen tim'} value={teamAccentFinish} onChange={setTeamAccentFinish}>{TEAM_ACCENT_FINISHES.map(([label]) => <option key={label} value={label}>{label}{LABELS[label] ? ` (${LABELS[label]})` : ''}</option>)}</SelectField>
           <SelectField label="Penempatan Logo Dada" value={chestEmblemMode} onChange={setChestEmblemMode}>{CHEST_EMBLEM_OPTIONS.map((label) => <option key={label} value={label}>{label}</option>)}</SelectField>
-          {mode === 'Finisher' && <SelectField label="Serangan pamungkas" value={finisher} onChange={setFinisher}>{option(finishers)}</SelectField>}
+          {!isRider && mode === 'Finisher' && <SelectField label="Serangan pamungkas" value={finisher} onChange={setFinisher}>{option(finishers)}</SelectField>}
           <div className="field">
-            <span style={{ display: 'block', fontSize: 13, marginBottom: 8, fontWeight: 500 }}>Sistem motif tim</span>
+            <span style={{ display: 'block', fontSize: 13, marginBottom: 8, fontWeight: 500 }}>{isRider ? 'Sistem motif Rider' : 'Sistem motif tim'}</span>
             <div className="segmented slim">
               <button className={unifiedMotif ? 'active' : ''} onClick={() => {
                 setUnifiedMotif(true);
@@ -1275,12 +1313,12 @@ function App() {
               <button className={!unifiedMotif ? 'active' : ''} onClick={() => setUnifiedMotif(false)}>Beda-beda motif</button>
             </div>
           </div>
-          {unifiedMotif && <SelectField label="Motif utama tim" value={activeHeroes[0]?.motif || 'Mythical beast'} onChange={(v) => setHeroes(current => current.map((h, i) => ({ ...h, motif: v, ...(v === 'Kustom' ? {} : { submotif: MOTIFS[v]?.[i % MOTIFS[v].length] || '' }) })))}>{[...Object.keys(MOTIFS), 'Kustom'].map((m) => <option key={m} value={m}>{m}{LABELS[m] ? ` (${LABELS[m]})` : ''}</option>)}</SelectField>}
+          {unifiedMotif && <SelectField label={isRider ? 'Motif bersama seri' : 'Motif utama tim'} value={activeHeroes[0]?.motif || 'Mythical beast'} onChange={(v) => setHeroes(current => current.map((h, i) => ({ ...h, motif: v, ...(v === 'Kustom' ? {} : { submotif: MOTIFS[v]?.[i % MOTIFS[v].length] || '' }) })))}>{[...Object.keys(MOTIFS), 'Kustom'].map((m) => <option key={m} value={m}>{m}{LABELS[m] ? ` (${LABELS[m]})` : ''}</option>)}</SelectField>}
           <label className="field character-count"><span>Jumlah karakter <b>{characterCount} hero</b></span><input type="range" min="1" max="10" value={characterCount} onChange={(e) => changeCount(e.target.value)} /><div className="range-pips">{[1,2,3,4,5,6,7,8,9,10].map((n) => <i className={n <= characterCount ? 'on' : ''} key={n}>{n}</i>)}</div></label>
         </section>
         <div className="section-rule"><span>Character lineup</span><small>{characterCount} / 10 aktif</small></div>
         <div className="hero-list">
-          {activeHeroes.map((hero, index) => <HeroCard key={hero.id} hero={hero} index={index} expanded={openHero === index} onToggle={() => setOpenHero(openHero === index ? -1 : index)} onChange={(key, value) => updateHero(hero.id, key, value)} device={device} unifiedMotif={unifiedMotif} />)}
+          {activeHeroes.map((hero, index) => <HeroCard key={hero.id} hero={hero} index={index} expanded={openHero === index} onToggle={() => setOpenHero(openHero === index ? -1 : index)} onChange={(key, value) => updateHero(hero.id, key, value)} device={device} unifiedMotif={unifiedMotif} isRider={isRider} />)}
         </div>
         <button className="generate-button" onClick={generate}><span><WandSparkles size={20} /> Buat Prompt Produksi</span><ArrowRight size={19} /></button>
         <p className="build-note"><Check size={14} /> {notice}</p>
@@ -1288,7 +1326,7 @@ function App() {
       <section className="right-pane">
         <div className="output-header"><div><div className="eyeline"><Layers3 size={16} /> Generator aktif</div><h2>Production Output</h2><p>Prompt English yang siap disalin untuk Whisk &amp; Dreamina Seedance 2.0.</p></div><button className="clear-button" onClick={() => setNotice('Output tetap tersedia — ubah set produksi untuk memperbarui.')}> <X size={15} /> Reset notice</button></div>
         <nav className="output-tabs" aria-label="Output categories"><button className={tab === 'image' ? 'selected' : ''} onClick={() => setTab('image')}><Clapperboard size={16} /> Prompt Image <span>{outputs.image.length}</span></button><button className={tab === 'video' ? 'selected' : ''} onClick={() => setTab('video')}><Film size={16} /> Prompt Video <span>{outputs.video.length}</span></button><button className={tab === 'seo' ? 'selected' : ''} onClick={() => setTab('seo')}>SEO <span>{outputs.seo.length}</span></button><button className="copy-all" onClick={() => handleCopy(currentOutputs.map((o) => `${o.title}\n${o.text}`).join('\n\n'), 'all')}><Clipboard size={15} /> {copied === 'all' ? 'Semua disalin!' : 'Salin semua'}</button></nav>
-        <div className="output-scroll"><div className="output-lead"><span className="signal" />{tab === 'image' ? 'Mulai dari Master Team Reference, lalu gunakan sebagai acuan untuk prompt hero individual di Whisk.' : tab === 'video' ? 'Seedance 2.0 movement, cinematic camera, and sequence prompts.' : 'Metadata untuk menyimpan dan menemukan konsep produksi.'}</div>{currentOutputs.map((item) => <OutputCard item={item} key={item.id} copied={copied} onCopy={handleCopy} />)}<div className="output-footer"><Sparkles size={17} /><span>Guardrail aktif: karakter fiktif dewasa, tanpa kemiripan dengan orang nyata atau logo franchise.</span></div></div>
+        <div className="output-scroll"><div className="output-lead"><span className="signal" />{tab === 'image' ? (isRider ? 'Mulai dari Master Rider Reference untuk menjaga armor dan Driver setiap Rider konsisten.' : 'Mulai dari Master Team Reference, lalu gunakan sebagai acuan untuk prompt hero individual di Whisk.') : tab === 'video' ? 'Seedance 2.0 movement, cinematic camera, and sequence prompts.' : 'Metadata untuk menyimpan dan menemukan konsep produksi.'}</div>{currentOutputs.map((item) => <OutputCard item={item} key={item.id} copied={copied} onCopy={handleCopy} />)}<div className="output-footer"><Sparkles size={17} /><span>Guardrail aktif: karakter fiktif dewasa, tanpa kemiripan dengan orang nyata atau logo franchise.</span></div></div>
       </section>
     </div>
   </main>
