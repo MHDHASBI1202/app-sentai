@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { applyProductionStyle } from './promptStyle'
 import { RIDER_ROLES, RIDER_SERIES, RIDER_SERIES_LABELS, RIDER_ARMORS, RIDER_EYES, RIDER_FINISHERS, RIDER_DEVICES, makeRider, buildRiderOutputs } from './rider'
 import {
   ArrowRight, Check, ChevronDown, Clipboard, Clapperboard, Copy, Film, Flame,
@@ -6,19 +7,19 @@ import {
 } from 'lucide-react'
 
 const AURAS = [
-  ['Crimson Red', '#f0444b', 'crimson plasma embers, hot red light trails'],
+  ['Crimson Red', '#f0444b', 'soft floating light points, hot red light trails'],
   ['Ruby Blaze', '#e21d48', 'ruby fire shards, scarlet heat haze'],
   ['Scarlet Comet', '#ff3b30', 'scarlet comet trails, fast glowing particles'],
-  ['Vermilion Flare', '#f35b1c', 'vermilion flame wisps, sparking orange cinders'],
+  ['Vermilion Flare', '#f35b1c', 'vermilion flame wisps, soft floating light points'],
   ['Cherry Pulse', '#d8124e', 'cherry-red pulse rings, glossy red motes'],
-  ['Blood Moon', '#8f1729', 'deep blood-red moon dust, dark crimson mist'],
+  ['Blood Moon', '#8f1729', 'deep soft floating light points, dark crimson mist'],
   ['Coral Inferno', '#ff665c', 'coral fireflies, warm rolling light bursts'],
-  ['Rose Ember', '#f35177', 'rose embers, soft magenta heat ripples'],
-  ['Tangerine Rush', '#ff7a18', 'tangerine sparks, kinetic orange speed trails'],
-  ['Ember Orange', '#e85d04', 'burning amber embers, smoky orange glows'],
-  ['Copper Spark', '#c76b35', 'copper metallic sparks, burnished light flakes'],
-  ['Solar Gold', '#f8c84e', 'golden sun sparks, warm radiant flares'],
-  ['Amber Voltage', '#ffb000', 'amber electric arcs, charged golden dust'],
+  ['Rose Ember', '#f35177', 'soft floating light points, soft magenta heat ripples'],
+  ['Tangerine Rush', '#ff7a18', 'soft floating light points, kinetic orange speed trails'],
+  ['Ember Orange', '#e85d04', 'soft floating light points, soft orange glows'],
+  ['Copper Spark', '#c76b35', 'soft floating light points, soft floating light points'],
+  ['Solar Gold', '#f8c84e', 'soft floating light points, warm radiant flares'],
+  ['Amber Voltage', '#ffb000', 'amber electric arcs, soft floating light points'],
   ['Citrine Ray', '#f9dd45', 'citrine sunbeams, crystalline yellow motes'],
   ['Marigold Burst', '#f5a524', 'marigold fireworks, bright warm starbursts'],
   ['Lemon Nova', '#e8f132', 'lemon plasma flashes, neon yellow light streaks'],
@@ -28,43 +29,43 @@ const AURAS = [
   ['Mint Frost', '#5fe2d1', 'mint frost crystals, cold luminous vapor'],
   ['Forest Prism', '#287a4b', 'forest-green prism leaves, dappled light shards'],
   ['Teal Surge', '#0aa6a6', 'teal ocean spray, turquoise wave ribbons'],
-  ['Seafoam Halo', '#8be4c3', 'seafoam halos, pale green glimmering dust'],
+  ['Seafoam Halo', '#8be4c3', 'seafoam halos, pale soft floating light points'],
   ['Aqua Surge', '#31bdf6', 'aqua kinetic droplets, electric blue arcs'],
   ['Cerulean Tide', '#168ddd', 'cerulean tidal ribbons, crystalline blue spray'],
   ['Cyan Plasma', '#00d9e8', 'cyan plasma pulses, icy electric filaments'],
   ['Skyline Blue', '#5ca9ff', 'clear sky-blue gusts, airy light motes'],
   ['Cobalt Nova', '#4766f3', 'cobalt stardust, deep-blue energy ribbons'],
-  ['Sapphire Arc', '#2354d7', 'sapphire lightning, faceted blue sparks'],
+  ['Sapphire Arc', '#2354d7', 'sapphire lightning, soft floating light points'],
   ['Indigo Storm', '#3c3fb4', 'indigo thundercloud mist, violet-blue bolts'],
-  ['Navy Eclipse', '#172554', 'navy eclipse shadows, dark blue lunar dust'],
+  ['Navy Eclipse', '#172554', 'navy eclipse shadows, dark soft floating light points'],
   ['Violet Prism', '#aa61ec', 'violet prism fragments, purple lens flares'],
   ['Amethyst Rift', '#7e3ace', 'amethyst rift cracks, floating purple crystals'],
   ['Orchid Nebula', '#c56ae6', 'orchid nebula fog, soft cosmic glitter'],
   ['Lavender Dream', '#a99cf5', 'lavender haze, gentle pastel light ribbons'],
-  ['Magenta Pulse', '#dc2f9d', 'magenta heartbeat waves, vivid pink sparks'],
-  ['Fuchsia Aurora', '#ed4acb', 'fuchsia aurora curtains, luminous pink dust'],
-  ['Rose Quasar', '#f06ca5', 'rose quasar dust, pink aurora pulses'],
+  ['Magenta Pulse', '#dc2f9d', 'magenta heartbeat waves, soft floating light points'],
+  ['Fuchsia Aurora', '#ed4acb', 'fuchsia aurora curtains, soft floating light points'],
+  ['Rose Quasar', '#f06ca5', 'soft floating light points, pink aurora pulses'],
   ['Peach Starlight', '#ffa58c', 'peach starlight, soft warm glitter'],
   ['Obsidian Void', '#596376', 'inky void mist, dark silver motes'],
-  ['Black Diamond', '#171717', 'black diamond glints, charcoal smoke ribbons'],
-  ['Gunmetal Eclipse', '#34404d', 'gunmetal eclipse dust, cold steel flashes'],
-  ['Smoke Chrome', '#7a858c', 'chrome vapor, metallic silver particle trails'],
-  ['Silver Photon', '#c5d2d9', 'silver photon sparks, bright chrome flares'],
+  ['Black Diamond', '#171717', 'black diamond glints, dark translucent light ribbons'],
+  ['Gunmetal Eclipse', '#34404d', 'soft floating light points, cold steel flashes'],
+  ['Smoke Chrome', '#7a858c', 'soft silver light, metallic silver particle trails'],
+  ['Silver Photon', '#c5d2d9', 'soft floating light points, bright chrome flares'],
   ['Pearl Halo', '#f4f4ed', 'pearl-white halos, soft floating light specks'],
   ['Arctic White', '#dff7ff', 'arctic snow crystals, clean blue-white glow'],
   ['Ivory Starlight', '#fff0c9', 'ivory stardust, gentle champagne rays'],
   ['Bronze Tectonic', '#9a5b37', 'bronze rock fragments, earthy seismic pulses'],
-  ['Umber Meteor', '#5b3828', 'umber meteor dust, dark earthen sparks'],
+  ['Umber Meteor', '#5b3828', 'soft floating light points, soft floating light points'],
   ['Holographic Spectrum', '#79e8ff', 'shifting holographic rainbow refractions, spectral particles'],
   ['Aurora Borealis', '#62f0bd', 'green-violet aurora curtains, polar light mist'],
   ['Ultraviolet Cosmic', '#6428ff', 'ultraviolet cosmic rays, deep-space star flecks'],
-  ['Infrared Reactor', '#ff3157', 'infrared heat waves, red thermal sparks'],
+  ['Infrared Reactor', '#ff3157', 'infrared heat waves, soft floating light points'],
   ['Laser Rainbow', '#ff6dff', 'multicolor laser trails, refracted rainbow motes'],
   ['Mercury Mirror', '#aab6c2', 'mirror-silver reflections, liquid metal glints'],
   ['Void Teal', '#0d5e66', 'dark teal fog, submerged neon particles'],
-  ['Royal Purple', '#6e2aa5', 'royal purple velvet haze, regal star flakes'],
-  ['Electric Blue', '#1d8cff', 'electric blue bolts, high-energy ion sparks'],
-  ['Neon Green', '#46ff79', 'neon green laser grid, radioactive glow dust'],
+  ['Royal Purple', '#6e2aa5', 'royal purple velvet haze, soft floating light points'],
+  ['Electric Blue', '#1d8cff', 'electric blue bolts, soft floating light points'],
+  ['Neon Green', '#46ff79', 'neon green laser grid, soft floating light points'],
   ['Hot Pink', '#ff2c9a', 'hot pink shockwaves, vivid sparkling flares'],
 ]
 
@@ -302,6 +303,7 @@ const LABELS = {
 }
 
 const LOCATIONS = [
+  'Plaza kota bersih saat siang',
   'Pantai karang saat senja', 'Reruntuhan kota berkabut', 'Jalan cyberpunk basah setelah hujan',
   'Atap gedung metropolis', 'Hutan bambu berkabut', 'Stasiun luar angkasa orbit rendah',
   'Gudang industri terbengkalai', 'Lembah vulkanik berasap', 'Kuil kuno di pegunungan',
@@ -321,6 +323,7 @@ const LOCATIONS = [
 ]
 
 const AESTHETICS = [
+  'Fotografi live-action natural',
   'Sinematik Era Heisei', 'Drama Tokusatsu Modern', 'Tokusatsu Noir — Gelap Atmosferik',
   'Realisme Neon Cyberpunk', 'Cahaya Siang Musim Panas Terang', 'Retro Showa Film Grain',
   'Kaiju Disaster Epic', 'Analog 90s Direct-to-Film',
@@ -772,102 +775,17 @@ const motifAccentDetail = (hero, chestEmblemMode) => {
 }
 
 const heroSignaturePose = (hero, index) => {
-  if (hero?.role === 'Sixth Ranger') {
-    return 'flamboyant signature roll-call flourish: body angled at a dynamic 45-degree swagger, one arm swept outward dramatically displaying the morpher device, opposite hand resting cockily on the hip, helmet tilted with visor catching the rim light'
-  }
-
-  const sub = (motifSubName(hero) || '').toLowerCase()
-  const motif = (motifName(hero) || '').toLowerCase()
-
-  // Dinosaur / Prehistoric
-  if (/t.?rex|tyranno|carno|spino|allosaurus/.test(sub)) {
-    return 'fierce predator claw lunge: deep athletic crouch, dominant hand coiled into an aggressive dinosaur claw thrusting toward the camera, trailing hand cocked near the hip ready to strike, chest expanded with raw primal intensity'
-  }
-  if (/triceratops|tri.?horn|ankylo|stego|brachio|pachy|mammoth|rhino/.test(sub)) {
-    return 'sturdy heavy-guard stance: deep grounded horse stance with knees bent wide, both arms angled forward with clenched fists resembling charging horns, solid immovable defensive posture'
-  }
-  if (/pterano|raptor|velociraptor/.test(sub)) {
-    return 'agile airborne hunter poise: low crouching spring stance on balls of the feet, one arm swept backward like a razor wing, other claw poised at eye level, ready to strike'
-  }
-
-  // Dragons & Mythical
-  if (/dragon|drago|ryuu|wyvern/.test(sub)) {
-    return 'majestic dragon-coil martial arts guard: deep flowing cat stance, one palm pressing downward with fingers curved like dragon talons, other hand raised high in a coiling dragon strike overhead'
-  }
-  if (/phoenix|firebird|garuda|suzaku/.test(sub)) {
-    return 'regal soaring phoenix flourish: high balanced stance with chest proudly arched, arms sweeping outward and upward like blazing celestial wings, head held high with heroic composure'
-  }
-  if (/kitsune|fox|gumiho/.test(sub)) {
-    return 'mystic fox-spirit combat pose: nimble crossing-step stance, one hand forming a sharp fox-finger mudra at cheek level, opposite arm tucked sleekly behind the back'
-  }
-  if (/pegasus|kirin|unicorn|stallion/.test(sub)) {
-    return 'noble celestial vanguard poise: upright chivalric guard, one arm angled upward pointing to the sky, trailing hand resting firmly over the belt buckle, gallant and proud'
-  }
-  if (/griffin|chimera|hydra|basilisk/.test(sub)) {
-    return 'fierce mythical beast battle poise: wide low-center stance with both hands clawed forward in predatory tension, chest broad and imposing'
-  }
-
-  // Big Cats & Felines
-  if (/tiger|lion|panther|jaguar|leopard|cheetah|cat|lynx/.test(sub)) {
-    return 'ferocious big-cat claw stance: low predatory crouch with torso leaning forward, lead hand extended in a fierce curved claw at chin level, rear hand coiled at the ribs, coiled spring energy'
-  }
-
-  // Canines
-  if (/wolf|hound|canine|jackal|fenrir|shiba|dingo|coyote/.test(sub)) {
-    return 'feral wolf hunter stance: low forward-leaning hunter pose, one leg stepped back ready to dash, one arm sliced forward with knife-hand precision, other tucked behind for aerodynamic balance'
-  }
-
-  // Birds of Prey
-  if (/eagle|falcon|hawk|condor|owl|raven|crow|bird/.test(sub)) {
-    return 'sharp raptor-wing flight guard: elevated balanced stance, arms spread in wide angular wing silhouettes with fingers curved like talons, visor staring sharply ahead with predatory precision'
-  }
-
-  // Ninja & Shinobi
-  if (/(ninja|shinobi|shadow)/.test(motif) || /(ninja|shadow|shinobi)/.test(sub)) {
-    return 'authentic shinobi shadow seal: deep low cross-legged crouch, two-handed interlocking kuji-in finger seal held tight before the chest, head slightly bowed with glowing visor peering upward through the shadows'
-  }
-
-  // Samurai & Swordsman & Knights
-  if (/(samurai|knight|blade|kenshi|paladin)/.test(motif) || /(ronin|shogun|daimyo|knight|paladin|blade|sword)/.test(sub)) {
-    return 'disciplined swordsman blade salute: tall formal stance with feet locked in an L-position, lead hand raised in a crisp vertical knife-hand blade guard aligned with the visor center, other hand anchoring the hip'
-  }
-
-  // Marine / Ocean
-  if (/shark|orca|marlin|barracuda|hammerhead/.test(sub)) {
-    return 'sleek wave-cutter blade stance: low agile surf-stance with body turned sideways, lead arm thrust forward in a razor-sharp knife-hand fin strike slicing the air'
-  }
-  if (/manta|ray|dolphin|whale|turtle|jellyfish|squid|octopus/.test(sub)) {
-    return 'fluid tide-swept combat poise: sweeping low-to-high arm arc resembling ocean currents, graceful yet lethal aquatic martial arts balance'
-  }
-
-  // Insects & Arachnids
-  if (/beetle|stag|hercules/.test(sub)) {
-    return 'armored beetle-horn lock: wide low stance, both elbows raised high with forearms curved inward like crushing mandibles, impenetrable combat front'
-  }
-  if (/mantis|scorpion|spider|wasp|ant|dragonfly|moth/.test(sub)) {
-    return 'lethal mantis scythe poise: high crane-style balance on one foot, both forearms raised into sharp hooked scythe strikes aimed at the camera'
-  }
-
-  // Feminine martial flourish fallback
-  if (isFeminineGender(hero.gender)) {
-    const femininePoses = [
-      'graceful dynamic martial-arts flourish: elegant low-stance pivot with one leg extended, lead hand arched in a delicate yet lethal palm strike, trailing hand swept back in a fluttering arc',
-      'nimble high-balance flourish: weight shifted gracefully to the rear foot, lead foot touched lightly on its toe, both hands curved in elegant martial-arts poise framing the torso',
-      'swift aerial acrobat pose: side-angled stance with a slight torso twist, one arm raised overhead in a curved crane guard, other hand resting lightly against the waist sash',
-    ]
-    return femininePoses[index % femininePoses.length]
-  }
-
-  // Positional index fallbacks (classic Sentai team choreography)
-  const sentaiPoses = [
-    'iconic center-leader combat lunge: aggressive low stance with right leg thrust back, right clenched fist cocked back at waist level and left open-claw hand thrust forward with commanding authority',
-    'cool disciplined tactical guard: upright 3/4 angled stance, left arm swept horizontally across the chest in a sharp knife-hand block, right hand poised at the morpher',
-    'explosive dynamic athletic crouch: deep wide squat with palms open and fingers flexed, torso angled low to the ground radiating ready-to-spring agility',
-    'resolute heavy-anchor stance: grounded stance with shoulders squared, both fists clenched firmly at waist height with elbows locked, unyielding barrier posture',
-    'nimble high-balance flourish: weight shifted gracefully to the rear foot, lead foot touched lightly on its toe, both hands curved in elegant martial-arts poise framing the torso',
-    'enigmatic folded-arm power stance: grounded shoulder-width footing, arms tightly crossed across the chest with head slightly tilted down, exuding quiet veteran confidence',
-  ]
-  return sentaiPoses[index % sentaiPoses.length]
+  const motif = `${motifSubName(hero)} ${motifName(hero)}`.toLowerCase()
+  if (hero?.role === 'Sixth Ranger') return 'confident relaxed guard, feet shoulder-width apart, one hand presenting the morpher at waist level, shoulders level and neck neutral'
+  if (/ninja|shadow|fox/.test(motif)) return 'compact martial-arts guard, knees slightly bent, one open hand at chest height and the other near the waist, stable footing'
+  if (/samurai|knight|sword|blade/.test(motif)) return 'upright swordsman guard, lead foot a short step forward, elbows comfortably bent, shoulders relaxed'
+  if (/bird|phoenix|eagle|falcon/.test(motif)) return 'balanced open guard, one forearm gently raised to shoulder height, the other near the ribs, both feet grounded'
+  if (/dragon|tiger|lion|wolf|dinosaur/.test(motif)) return 'grounded athletic guard, knees gently flexed, hands naturally curved at chest height, spine neutral'
+  return [
+    'balanced forward guard, one foot slightly ahead, fists loosely closed, elbows bent naturally',
+    'relaxed side-on combat stance, weight evenly distributed, lead hand open at chest height',
+    'upright ready stance, feet shoulder-width apart, one hand near the belt and the other in a comfortable guard',
+  ][index % 3]
 }
 
 // Classic Sentai team color order: Red, Blue, Yellow, Green, Pink, Black, Silver, White, Gold, Orange
@@ -995,7 +913,7 @@ function App({ initialCategory = 'sentai' }) {
   const [mode, setMode] = useProfileState(isRider, 'Henshin')
   const [sequence, setSequence] = useProfileState(isRider, 'Bersama')
   const [aesthetic, setAesthetic] = useProfileState(isRider, AESTHETICS[0])
-  const [location, setLocation] = useProfileState(isRider, LOCATIONS[1])
+  const [location, setLocation] = useProfileState(isRider, LOCATIONS[0])
   const [deviceIndex, setDeviceIndex] = useProfileState(isRider, 0)
   const [shoutMode, setShoutMode] = useProfileState(isRider, 'preset')
   const [shoutPreset, setShoutPreset] = useProfileState(isRider, SHOUT_PRESETS[0], 'Henshin!')
@@ -1074,7 +992,7 @@ function App({ initialCategory = 'sentai' }) {
 
   const outputs = useMemo(() => {
     if (isRider) return buildRiderOutputs({ heroes: activeHeroes, auras: AURAS, series: teamName, mode, sequence, aesthetic, location, shout: resolvedShout, suitSystem: sharedSuitSystem, accent: teamAccentFinish, chestMode: chestEmblemMode, civilianOutfit: civilianOutfitDetail, feminineDetail: feminineDesignName, motifName: h => h.motif === 'Kustom' ? (h.customMotif || 'original custom motif') : `${h.submotif} ${h.motif}` })
-    const realism = 'hyperrealistic live-action photography, natural human anatomy, practical tokusatsu suit materials, cinematic lighting, 4k film still'
+    const realism = 'live-action photography of real performers in clean physical tokusatsu costumes, soft realistic lighting, natural photographic detail'
     const resolvedTeamName = safe(teamName.trim() || 'Sentai Aegis')
     const teamRoster = activeHeroes.map((h, index) => `${index + 1}. ${safe(h.name)} — ${AURAS[h.aura][0]} primary color, ${motifSubName(h)} ${motifName(h)} motif${h.role === 'Sixth Ranger' ? ' [SIXTH RANGER]' : ''}`).join(' | ')
     let teamCrestRule = `and the same original ${resolvedTeamName} crest fixed on the left chest.`
@@ -1100,7 +1018,7 @@ function App({ initialCategory = 'sentai' }) {
     const memberLock = (h) => `${safe(h.name)}: ${AURAS[h.aura][0]} ${h.role === 'Sixth Ranger' ? 'SIXTH RANGER' : 'member'}, ${h.body.toLowerCase()} build, ${motifSubName(h)} motif, helmet: ${helmetCrestShape(h)}, ${motifAccentDetail(h, chestEmblemMode)}${feminineDesignName(h)}.${sixthRangerNote(h)}`
     const heroHuman = (h) => {
       const aura = AURAS[h.aura]
-      return `Full-body reference of ${safe(h.name)}, head to toe with feet visible. ${h.age}-year-old ${h.gender.toLowerCase()}, ${h.ethnicity} heritage, ${h.body.toLowerCase()} build, ${h.hair.toLowerCase()}. Wearing ${civilianOutfitDetail(h)} with ${h.accessory.toLowerCase()}. ${AURAS[h.aura][0]} civilian member of ${resolvedTeamName}, holding a ${device[0].toLowerCase()} (${device[1]}). Set at ${location}; ${aesthetic}. ${aura[2]}. ${realism}.`
+      return `Full-body reference of ${safe(h.name)}, head to toe with feet visible. ${h.age}-year-old ${h.gender.toLowerCase()}, ${h.ethnicity} heritage, ${h.body.toLowerCase()} build, ${h.hair.toLowerCase()}. Wearing ${civilianOutfitDetail(h)} with ${h.accessory.toLowerCase()}. ${AURAS[h.aura][0]} civilian member of ${resolvedTeamName}, holding a ${device[0].toLowerCase()} (${device[1]}). Set at ${location}; ${aesthetic}. ${realism}.`
     }
     const heroSuit = (h, i) => {
       const aura = AURAS[h.aura]; const motif = h.motif === 'Kustom' ? h.customMotif : `${h.submotif} ${h.motif}`
@@ -1114,7 +1032,7 @@ function App({ initialCategory = 'sentai' }) {
         const evolvedDesc = needsEvolvedMotif ? `; evolved/awakened ${motifSubName(h)} motif variant` : ''
         sixthSuitExtra = `. Sixth-ranger variant: ${style}${accentDesc}${evolvedDesc}`
       }
-      return `[ATTACH YOUR 'MASTER TEAM REFERENCE' IMAGE AS CREF] Full-body hero suit reference of ${safe(h.name)}, head to toe with boots visible. Striking signature roll-call combat pose: ${heroSignaturePose(h, i)}. ${aura[0]} spandex tokusatsu suit, ${h.body.toLowerCase()} build, ${h.coverage.toLowerCase()}, inspired by ${motif}, ${suitDesign}, helmet: ${helmetCrestShape(h)}, ${motifAccentDetail(h, chestEmblemMode)}${feminineDesignName(h)}${sixthSuitExtra}. ${teamBible} ${device[0].toLowerCase()} placed: ${device[1]}. ${aura[2]}. Match the Master Team Reference exactly — only change color to ${aura[0]}, motif to ${motif}, and helmet crest to ${helmetCrestShape(h)}. ${location}; ${aesthetic}. ${realism}.`
+      return `[ATTACH YOUR 'MASTER TEAM REFERENCE' IMAGE AS CREF] Full-body hero suit reference of ${safe(h.name)}, head to toe with boots visible. Striking signature roll-call combat pose: ${heroSignaturePose(h, i)}. ${aura[0]} spandex tokusatsu suit, ${h.body.toLowerCase()} build, ${h.coverage.toLowerCase()}, inspired by ${motif}, ${suitDesign}, helmet: ${helmetCrestShape(h)}, ${motifAccentDetail(h, chestEmblemMode)}${feminineDesignName(h)}${sixthSuitExtra}. ${teamBible} ${device[0].toLowerCase()} placed: ${device[1]}. Match the Master Team Reference exactly — only change color to ${aura[0]}, motif to ${motif}, and helmet crest to ${helmetCrestShape(h)}. ${location}; ${aesthetic}. ${realism}.`
     }
     const heroLineupEntry = (h, i) => {
       const aura = AURAS[h.aura]
@@ -1148,11 +1066,11 @@ function App({ initialCategory = 'sentai' }) {
     } else if (activeHeroes.length === 2) {
       teamFormationDesc = `Duo synchronized roll-call formation: ${safe(activeHeroes[0].name)} (center-right, low stance) and ${safe(activeHeroes[1].name)} (center-left, elevated complementary stance) in mirrored battle-ready choreography.`
     } else if (activeHeroes.length === 3) {
-      teamFormationDesc = `Triangular 3-hero roll-call formation: ${safe(activeHeroes[0].name)} (center-front in a deep low stance), flanked by ${safe(activeHeroes[1].name)} on the left wing and ${safe(activeHeroes[2].name)} on the right wing in complementary elevated stances.`
+      teamFormationDesc = `Triangular 3-hero roll-call formation: ${safe(activeHeroes[0].name)} (center-front in a comfortable grounded stance), flanked by ${safe(activeHeroes[1].name)} on the left wing and ${safe(activeHeroes[2].name)} on the right wing in complementary elevated stances.`
     } else if (activeHeroes.length === 4) {
       teamFormationDesc = `Dynamic 4-hero staggered V-formation: ${safe(activeHeroes[0].name)} anchored front-center, with ${safe(activeHeroes[1].name)}, ${safe(activeHeroes[2].name)}, and ${safe(activeHeroes[3].name)} fanning outward at staggered depths.`
     } else if (activeHeroes.length === 5) {
-      teamFormationDesc = `Iconic Super Sentai 5-hero pyramid formation: ${safe(activeHeroes[0].name)} (Red/Leader) front and center in a low dynamic combat stance; flanked closely by ${safe(activeHeroes[1].name)} and ${safe(activeHeroes[2].name)} in mid-level battle stances; flanked on the outer wings by ${safe(activeHeroes[3].name)} and ${safe(activeHeroes[4].name)} in high acrobatic stances, creating a balanced triangular team silhouette.`
+      teamFormationDesc = `Iconic Super Sentai 5-hero pyramid formation: ${safe(activeHeroes[0].name)} (Red/Leader) front and center in a balanced combat stance; flanked closely by ${safe(activeHeroes[1].name)} and ${safe(activeHeroes[2].name)} in mid-level battle stances; flanked on the outer wings by ${safe(activeHeroes[3].name)} and ${safe(activeHeroes[4].name)} in upright balanced stances, creating a balanced triangular team silhouette.`
     } else {
       const sixthHero = activeHeroes.find(h => h.role === 'Sixth Ranger')
       const sixthText = sixthHero ? ` ${safe(sixthHero.name)} (Sixth Ranger) stands perched on an elevated vantage point on the outer flank with a flamboyant pose.` : ''
@@ -1165,7 +1083,7 @@ function App({ initialCategory = 'sentai' }) {
       id: 'team-roll-call',
       kind: 'IMAGE • TEAM ROLL CALL POSE',
       title: `${resolvedTeamName} — Full Team Roll Call Pose`,
-      text: `[ATTACH 'MASTER TEAM REFERENCE' AS CREF] Master live-action tokusatsu roll-call group shot of ${resolvedTeamName} (${activeHeroes.length} heroes assembled). ${teamFormationDesc}\n\nEach hero strikes their distinctive signature combat roll-call pose simultaneously:\n${rollCallPoseList}\n\nAll heroes wear their complete matching suits (${sharedSuitSystem}; ${sharedAccentFinish}), helmets with unique crests, and belts as established in Master Team Reference. Background: massive practical tokusatsu pyrotechnic colored smoke and spark wall explosion detonating behind them in synchronized member colors (${teamColors}), billowing dense vibrant clouds into the sky. Low-angle wide epic composition (16:9), drifting sparks and embers across the foreground, dramatic hero rim lighting. ${location}; ${aesthetic}. ${realism}. Aspect ratio 16:9.`
+      text: `[ATTACH 'MASTER TEAM REFERENCE' AS CREF] Master live-action tokusatsu roll-call group shot of ${resolvedTeamName} (${activeHeroes.length} heroes assembled). ${teamFormationDesc}\n\nEach hero strikes their distinctive signature combat roll-call pose simultaneously:\n${rollCallPoseList}\n\nAll heroes wear their complete matching suits (${sharedSuitSystem}; ${sharedAccentFinish}), helmets with unique crests, and belts as established in Master Team Reference. Background: a restrained wash of light in member colors (${teamColors}), separate from the performers and fading to reveal their spotless suits. Eye-level wide composition (16:9), realistic ambient lighting and clear silhouettes. ${location}; ${aesthetic}. ${realism}. Aspect ratio 16:9.`
     }
 
     const sheets = activeHeroes.flatMap((h, i) => [
@@ -1222,39 +1140,39 @@ function App({ initialCategory = 'sentai' }) {
 
     const shoutAction = resolvedShout === 'Tanpa teriakan (Hening)'
       ? `In focused silence, they perform a rhythmic series of martial-arts arm poses and activate their ${device[0].toLowerCase()} with a decisive cross-body gesture.`
-      : `They fiercely shout "${resolvedShout}", perform a rhythmic series of martial-arts arm poses, and activate their ${device[0].toLowerCase()} with a decisive cross-body gesture.`
+      : `They clearly call "${resolvedShout}" with natural expressions, perform one controlled henshin gesture, and activate their ${device[0].toLowerCase()} with a precise hand movement.`
 
     const videoMain = mode === 'Henshin'
       ? {
         id: 'video-main',
         kind: 'VIDEO • COMPACT PROMPT (RUNWAY / KLING / SORA)',
         title: teamTitleLabel,
-        text: `[ATTACH CREF] Live-action tokusatsu henshin: ${countLabel} in civilian attire start at ${location}. ${shoutAction} The environment momentarily shifts into a surreal transformation dimension as colossal glowing ethereal ${heroSpiritSummary} apparitions roar toward the camera with swirling ${heroAuraSummary}. Practical spark bursts envelop their bodies, materializing fitted spandex hero suits (${sharedSuitSystem}) and helmets with gleaming visors. Snapping back to ${location}, they land in a synchronized, low-angle roll-call pose lineup with each hero striking their unique signature pose amidst drifting embers and smoke. Camera: slow push-in during trigger, dynamic tracking through dimension shift, wide pull for final pose. ${aesthetic}, practical VFX sparks, cinematic lighting, 8s, 16:9.`,
+        text: `[ATTACH CREF] Live-action tokusatsu henshin: ${countLabel} in civilian attire start at ${location}. ${shoutAction} At the same location, faint ${heroSpiritSummary} light silhouettes appear briefly behind them with restrained ${heroAuraSummary}. Clean fitted spandex hero suits (${sharedSuitSystem}) form over their bodies, followed by physical helmets with controlled visor reflections. The light fades completely, revealing spotless suits as they settle into balanced individual ready stances. Camera: steady medium shot of activation, slow pull back to a clear full-body reveal. ${aesthetic}, soft motivated lighting, 8s, 16:9.`,
       }
       : {
         id: 'video-main',
         kind: 'VIDEO • COMPACT PROMPT (RUNWAY / KLING / SORA)',
         title: sequence === 'Bersama' ? `Live-Action Team Finisher — ${finisher}` : `Live-Action Solo Finisher — ${safe(activeHeroes[0]?.name || 'Hero')}`,
-        text: `[ATTACH CREF] Live-action tokusatsu finisher: ${countLabel} execute "${finisher}" at ${location}. On vocal command "${finisher}!", they charge weapons with glowing ${heroAuraSummary}. Colossal ethereal ${heroSpiritSummary} apparitions surge forward alongside them into a unified strike. Massive practical pyrotechnic spark explosion detonates behind them as they land a victorious hero pose. Camera: dynamic tracking, fast whip-pan strike, slow pull-back. ${aesthetic}, practical VFX, cinematic lighting, 8s, 16:9.`,
+        text: `[ATTACH CREF] Live-action tokusatsu finisher: ${countLabel} execute "${finisher}" at ${location}. On vocal command "${finisher}!", they charge weapons with glowing ${heroAuraSummary}. Faint ${heroSpiritSummary} light motifs accompany one coordinated strike. A brief distant light flash marks impact without debris touching the performers. They recover balance and finish in clean intact suits. Camera: smooth lateral tracking and a steady full-body finish. ${aesthetic}, restrained visual effects, natural lighting, 8s, 16:9.`,
       }
 
     const soloVideoPrompts = sequence === 'Solo' ? activeHeroes.map((h, i) => {
       const soloShoutAction = resolvedShout === 'Tanpa teriakan (Hening)'
         ? `In focused silence, ${safe(h.name)} performs rhythmic martial-arts arm poses and activates the ${device[0].toLowerCase()} with a decisive cross-body gesture.`
-        : `${safe(h.name)} fiercely shouts "${resolvedShout}", performs rhythmic martial-arts arm poses, and activates the ${device[0].toLowerCase()} with a decisive cross-body gesture.`
+        : `${safe(h.name)} clearly calls "${resolvedShout}" with a natural expression, performs one controlled henshin gesture, and activates the ${device[0].toLowerCase()} with a precise hand movement.`
 
       return mode === 'Henshin'
         ? {
           id: `video-solo-${h.id}`,
           kind: 'VIDEO • SOLO HENSHIN (RUNWAY / KLING / SORA)',
           title: `${String(i + 1).padStart(2, '0')} · ${h.name} — Solo Henshin Prompt`,
-          text: `[ATTACH CREF: ${h.name.toUpperCase()}] Live-action tokusatsu solo henshin: ${safe(h.name)} in civilian attire (${civilianOutfitDetail(h)}) starts at ${location}. ${soloShoutAction} The environment momentarily shifts into a surreal transformation dimension as a colossal glowing ethereal ${motifSubName(h)} spirit apparition roars toward the camera with swirling ${AURAS[h.aura][0]} aura (${AURAS[h.aura][2]}). Practical spark bursts envelop the body, materializing the fitted ${AURAS[h.aura][0]} spandex hero suit (${sharedSuitSystem}; ${sharedAccentFinish}) and helmet with sculpted ${helmetCrestShape(h)} and gleaming visor. Snapping back to ${location}, the hero lands in their signature roll-call pose (${heroSignaturePose(h, i)}) amidst drifting embers and smoke. Camera: slow push-in during trigger, dynamic tracking through dimension shift, wide pull for final pose. ${aesthetic}, practical VFX sparks, cinematic lighting, 8s, 16:9.`,
+          text: `[ATTACH CREF: ${h.name.toUpperCase()}] Live-action tokusatsu solo henshin: ${safe(h.name)} in civilian attire (${civilianOutfitDetail(h)}) starts at ${location}. ${soloShoutAction} A faint ${motifSubName(h)} light silhouette appears behind the performer with restrained ${AURAS[h.aura][0]} light. The clean fitted ${AURAS[h.aura][0]} spandex suit (${sharedSuitSystem}; ${sharedAccentFinish}) forms over the body, then the physical helmet closes with sculpted ${helmetCrestShape(h)}. The light fades completely, revealing a spotless costume. The hero settles naturally into a stable ready stance (${heroSignaturePose(h, i)}). Camera: steady medium shot of activation and slow full-body reveal at the same location. ${aesthetic}, soft realistic lighting, 8s, 16:9.`,
         }
         : {
           id: `video-solo-${h.id}`,
           kind: 'VIDEO • SOLO FINISHER (RUNWAY / KLING / SORA)',
           title: `${String(i + 1).padStart(2, '0')} · ${h.name} — Solo Finisher Prompt`,
-          text: `[ATTACH CREF: ${h.name.toUpperCase()}] Live-action tokusatsu solo finisher: ${safe(h.name)} executes "${finisher}" at ${location}. On vocal command "${finisher}!", the hero charges their signature weapon with glowing ${AURAS[h.aura][0]} aura (${AURAS[h.aura][2]}). A colossal ethereal ${motifSubName(h)} spirit apparition surges forward alongside the hero into a devastating strike. A massive practical pyrotechnic spark and fireball explosion detonates behind the hero upon impact as they land in their signature victory pose (${heroSignaturePose(h, i)}). Camera: dynamic tracking, fast whip-pan strike, slow pull-back. ${aesthetic}, practical VFX sparks, cinematic lighting, 8s, 16:9.`,
+          text: `[ATTACH CREF: ${h.name.toUpperCase()}] Live-action tokusatsu solo finisher: ${safe(h.name)} executes "${finisher}" at ${location}. On vocal command "${finisher}!", the hero charges their signature weapon with glowing ${AURAS[h.aura][0]} aura (${AURAS[h.aura][2]}). A faint ${motifSubName(h)} light motif follows the controlled strike. A brief distant light flash marks impact, with no debris or residue on the costume. The performer recovers balance in a clean intact suit (${heroSignaturePose(h, i)}). Camera: smooth action tracking and a steady full-body finish. ${aesthetic}, restrained visual effects, natural lighting, 8s, 16:9.`,
         }
     }) : []
 
@@ -1266,12 +1184,12 @@ function App({ initialCategory = 'sentai' }) {
       id: 'video-team-roll-call',
       kind: 'VIDEO • TEAM ROLL CALL (RUNWAY / KLING / SORA)',
       title: `${resolvedTeamName} — Live-Action Team Roll Call Sequence`,
-      text: `[ATTACH 'MASTER TEAM REFERENCE' AS CREF] Live-action tokusatsu team roll-call sequence: ${countLabel} in full hero suits (${sharedSuitSystem}; ${sharedAccentFinish}) assemble at ${location}. Stepping forward in synchronized cadence, they passionately announce their team name in thunderous unison, "${resolvedTeamName}!", while each hero simultaneously snaps into their distinctive character signature roll-call pose: ${rollCallPoseVideoDetails}. Behind them, a massive practical tokusatsu pyrotechnic spark and vibrant colored smoke wall explosion detonates in synchronized member colors (${teamColors}), sending thick billowing plumes into the sky. Camera: dynamic low-angle forward push-in as they step forward, rapid whip-pan across the members, pulling back wide into an epic heroic tableau pose with drifting sparks and windblown smoke. ${aesthetic}, practical tokusatsu VFX pyrotechnics, cinematic lighting, 8s, 16:9.`,
+      text: `[ATTACH 'MASTER TEAM REFERENCE' AS CREF] Live-action tokusatsu team roll-call sequence: ${countLabel} in full hero suits (${sharedSuitSystem}; ${sharedAccentFinish}) assemble at ${location}. Taking one measured step forward, they clearly announce their team name together, "${resolvedTeamName}!", while each hero simultaneously snaps into their distinctive character signature roll-call pose: ${rollCallPoseVideoDetails}. A subtle background light wash in member colors (${teamColors}) fades, leaving every clean suit clearly visible. Camera: a gentle forward tracking shot followed by a steady wide composition, no rapid cuts. ${aesthetic}, natural motivated lighting, 8s, 16:9.`,
     }
 
     const videoOutputs = sequence === 'Solo' ? [...soloVideoPrompts, videoRollCall] : [videoMain, videoRollCall]
     const seo = { id: 'seo', kind: 'PRODUCTION • SEO', title: 'Metadata Produksi', text: `Title: ${mode} ${sequence} — ${activeHeroes.map((h) => h.name).join(', ')}\nDescription: Hyperrealistic live-action tokusatsu scene in ${location}, styled as ${aesthetic}.\nKeywords: tokusatsu, super sentai inspired, live action superhero, practical spandex suit, cinematic henshin, ${teamMotif.toLowerCase()}, hyperrealistic video.\nSafety intent: original fictional characters.` }
-    return { image: [teamReference, teamRollCall, teamLogo, ...sheets, macro, ...storyboardItems], video: videoOutputs, seo: [seo] }
+    return applyProductionStyle({ image: [teamReference, teamRollCall, teamLogo, ...sheets, macro, ...storyboardItems], video: videoOutputs, seo: [seo] })
   }, [isRider, teamAccentFinish, activeHeroes, aesthetic, device, finisher, location, mode, sequence, sharedAccentFinish, sharedSuitSystem, teamMotif, teamName, chestEmblemMode, resolvedShout])
 
   const generate = () => { setNotice(`Prompt ${mode.toLowerCase()} untuk ${activeHeroes.length} karakter telah diperbarui.`); setTab('image') }

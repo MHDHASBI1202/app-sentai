@@ -1,6 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { buildRiderOutputs, makeRider, RIDER_ROLES } from './rider.js'
+import { CLEAN_COSTUME, LIVE_ACTION_REALISM, NATURAL_MOTION } from './promptStyle.js'
 
 const makeFixture = (count) => Array.from({ length: count }, (_, i) => ({
   ...makeRider(i), id: `rider-${i}`, name: `Civilian ${i}`, aura: 0, motif: 'Insect', submotif: `Motif ${i}`,
@@ -29,6 +30,12 @@ test('all counts, scene modes and sequence modes generate complete Rider product
       assert.match(item.text, /No text overlays, captions, subtitles/)
       assert.doesNotMatch(item.text, /each labeled|labeled panels|numbered panels|metallic lettering|Shout "/i)
     }
+    for (const item of [...outputs.image, ...outputs.video]) {
+      assert.ok(item.text.includes(LIVE_ACTION_REALISM))
+      if (!/PROP MACRO|EMBLEM/.test(item.kind)) assert.ok(item.text.includes(CLEAN_COSTUME))
+      assert.doesNotMatch(item.text, /Practical sparks and colored smoke|drifting smoke|massive.*explosion/i)
+    }
+    for (const item of outputs.video) assert.ok(item.text.includes(NATURAL_MOTION))
     heroes.forEach(h => {
       const reference = outputs.image.find(x => x.id === `hero-${h.id}`)
       for (const detail of [h.riderRole, h.eyes, h.driver, h.riderFinisher, h.weapon, h.form]) assert.ok(reference.text.includes(detail))
