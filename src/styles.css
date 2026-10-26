@@ -5,6 +5,7 @@
 .workspace-switch .segmented { max-width:460px; margin:0 auto; }
 .workspace-switch .segmented button { min-height:38px; font-size:12px; }
 .workspace-panel[hidden] { display:none !important; }
+.workspace-panel .app-shell { overflow-x:clip; }
 .workspace-panel .topbar { top:55px; }
 .battle-fighter { margin-top:22px; }
 .battle-fighter .settings-grid { margin-bottom:12px; }
