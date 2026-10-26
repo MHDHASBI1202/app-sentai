@@ -55,18 +55,18 @@ export function buildRiderOutputs({ heroes, auras, series, mode, sequence, aesth
   const item = (id, kind, title, text) => ({ id, kind, title, text })
   const civilian = (h) => `${clean(h.name)}, ${h.age}-year-old ${h.gender}, ${h.ethnicity} heritage, ${h.body} build, ${h.hair}; wearing ${civilianOutfit(h)}, accessory ${h.accessory}`
   const shoutText = shout === 'Tanpa teriakan (Hening)' ? 'Transform in focused silence.' : `Shout "${clean(shout)}".`
-  const action = (h) => mode === 'Henshin'
-    ? `${civilian(h)}. ${shoutText} Activate ${driver(h)}. ${auras[h.aura][2]} surrounds the body; articulated ${h.armor} plates assemble from boots to chest, then the ${h.eyes} helmet closes. Finish with an individual combat stance. ${lock(h)}`
+  const action = (h, includeSpeech = true) => mode === 'Henshin'
+    ? `${civilian(h)}. ${includeSpeech ? shoutText : 'Show the transformation through poses and visual effects only.'} Activate ${driver(h)}. ${auras[h.aura][2]} surrounds the body; articulated ${h.armor} plates assemble from boots to chest, then the ${h.eyes} helmet closes. Finish with an individual combat stance. ${lock(h)}`
     : `${name(h)} activates ${driver(h)}, charges ${auras[h.aura][2]}, and executes ${h.riderFinisher} using ${clean(h.weapon)}. ${h.riderFinisher.includes('Kick') ? 'Leap, extend the armored striking leg, connect with an energy impact, then land in a low stance.' : 'Wind up, release the personal strike, then settle into a victory stance.'} ${lock(h)}`
-  const groupAction = (list) => list.map(action).join('\n')
+  const groupAction = (list, includeSpeech = true) => list.map(h => action(h, includeSpeech)).join('\n')
   const image = [
-    item('rider-master', 'IMAGE • RIDER CONTINUITY', `${series} — Master Rider Reference`, `Full-body lineup of exactly ${heroes.length} distinct armored Riders, separate silhouettes, each labeled by identity and role. ${bible}\n${roster}\nFront view, boots and Drivers visible. ${scene}`),
+    item('rider-master', 'IMAGE • RIDER CONTINUITY', `${series} — Master Rider Reference`, `Full-body lineup of exactly ${heroes.length} distinct armored Riders, each identifiable by their own armor and separate silhouette. ${bible}\n${roster}\nFront view, boots and Drivers visible. ${scene}`),
     item('rider-lineup', 'IMAGE • RIDER LINEUP', `${series} — Rider Assembly`, `${cref} Cinematic ${heroes.length}-Rider assembly, each in an individual combat stance, staggered composition with separated armor silhouettes.\n${roster}\nPractical sparks and colored smoke. ${scene} 16:9.`),
-    item('rider-logo', 'IMAGE • SERIES LOGO', `${series} — Emblem / Crest`, `Original fictional series logo for "${clean(series)}", inspired by ${motifName(heroes[0])}. Angular metallic lettering, sculpted emblem, ${heroes.map(h => auras[h.aura][0]).join(', ')} accents, black background, centered prop product photo. No existing franchise logo. 4k.`),
+    item('rider-logo', 'IMAGE • SERIES EMBLEM', `${series} — Emblem / Crest`, `Original fictional symbol-only series emblem, inspired by ${motifName(heroes[0])}. Abstract sculpted geometric crest, ${heroes.map(h => auras[h.aura][0]).join(', ')} accents, black background, centered prop product photo. Purely pictorial design. 4k.`),
     ...heroes.flatMap(h => [
       item(`human-${h.id}`, 'IMAGE • HUMAN FORM', `${h.name} — Civilian Reference`, `Full-body civilian reference: ${civilian(h)}. Holding the personal transformation component for ${driver(h)}. ${scene}`),
       item(`hero-${h.id}`, 'IMAGE • HERO FORM', `${name(h)} — ${h.riderRole}`, `${cref} Full-body armored hero reference, individual battle-ready stance, boots visible. ${lock(h)} ${scene}`),
-      item(`sheet-${h.id}`, 'IMAGE • CHARACTER SHEET 9:16', `${name(h)} — Character Sheet`, `${cref} White background, 2 columns (civilian and armored Rider), 5 rows (front, three-quarter, side, back, face / helmet detail), labeled panels. Civilian: ${civilian(h)}. Armor: ${lock(h)} Even studio lighting. ${scene} 9:16.`),
+      item(`sheet-${h.id}`, 'IMAGE • CHARACTER SHEET 9:16', `${name(h)} — Character Sheet`, `${cref} White background, 2 columns (civilian on the left and armored Rider on the right), 5 rows arranged from top to bottom: front, three-quarter, side, back, face / helmet detail. Separate the views with clean empty gutters. Civilian: ${civilian(h)}. Armor: ${lock(h)} Even studio lighting. ${scene} 9:16.`),
       item(`driver-${h.id}`, 'IMAGE • PROP MACRO', `${name(h)} — ${h.driver}`, `Personal transformation prop product photo. ${lock(h)} Focus only on ${driver(h)}, its personal ${motifName(h)} component, ${personalAccent(h)} trim, tactile controls, painted ABS, metal and translucent resin. Dark tabletop, rim light, shallow depth of field, 4k.`),
     ]),
   ]
@@ -75,11 +75,12 @@ export function buildRiderOutputs({ heroes, auras, series, mode, sequence, aesth
   groups.forEach((list, i) => {
     const title = list.length === 1 ? name(list[0]) : `${series} — ${list.length} Riders`
     const panels = mode === 'Henshin'
-      ? '1: civilian stance; 2: close-up of each personal Driver activation; 3: individual energy motif; 4: segmented armor assembles; 5: personal helmet and eyes lock; 6: completed Rider combat stance.'
-      : '1: armored battle stance; 2: each personal Driver charges; 3: personal aura gathers; 4: wind-up for each personal finisher; 5: distinct finishing strikes impact; 6: landing and victory stance.'
-    image.push(item(`rider-story-${i}`, 'IMAGE • STORYBOARD 3:2', `${title} — ${mode} Storyboard`, `${cref} Strict 2 columns × 3 rows, six equal numbered panels, thin white gutters. ${panels}\n${groupAction(list)}\n${scene} 3:2.`))
+      ? 'Read left to right, top to bottom: civilian stance; close-up of each personal Driver activation; individual energy motif; segmented armor assembles; personal helmet and eyes lock; completed Rider combat stance.'
+      : 'Read left to right, top to bottom: armored battle stance; each personal Driver charges; personal aura gathers; wind-up for each personal finisher; distinct finishing strikes impact; landing and victory stance.'
+    image.push(item(`rider-story-${i}`, 'IMAGE • STORYBOARD 3:2', `${title} — ${mode} Storyboard`, `${cref} Strict 2 columns × 3 rows, six equal visual panels, thin white gutters. ${panels}\n${groupAction(list, false)}\n${scene} 3:2.`))
     video.push(item(`rider-video-${i}`, 'VIDEO • CINEMATIC PROMPT', `${title} — ${mode}`, `${cref} ${groupAction(list)}\nCamera: close-up Driver trigger, tracking action, low-angle wide final stance. ${scene} Practical VFX, 8s, 16:9.`))
   })
   video.push(item('rider-assembly-video', 'VIDEO • RIDER ASSEMBLY', `${series} — Rider Assembly Sequence`, `${cref} ${roster}\nEach Rider steps into frame and takes a distinct combat stance. Announce individual Rider identities in sequence. Practical sparks and drifting smoke. Camera tracks across each unique helmet and armor, pulls back to show exactly ${heroes.length} Riders. ${scene} 8s, 16:9.`))
-  return { image, video, seo: [item('rider-seo', 'PRODUCTION • SEO', 'Metadata Produksi', `Title: ${series} — ${mode} ${sequence}\nDescription: Original armored Rider concept at ${location}, ${aesthetic}.\nCast: ${heroes.map(h => `${name(h)} (${h.riderRole})`).join(', ')}\nKeywords: kamen rider inspired, tokusatsu, armored hero, transformation driver, ${mode.toLowerCase()}, practical armor, ${heroes.map(motifName).join(', ')}.\nOriginal fictional characters.`)] }
+  const imageOnlyRule = 'Render only the visual scene. Names, roles and reference instructions are context only and must never appear in the artwork. No text overlays, captions, subtitles, nameplates, labels, panel numbers, speech bubbles, lettering, typography or watermarks. Emblems must be pictorial symbols without letters or words.'
+  return { image: image.map(prompt => ({ ...prompt, text: `${prompt.text}\n${imageOnlyRule}` })), video, seo: [item('rider-seo', 'PRODUCTION • SEO', 'Metadata Produksi', `Title: ${series} — ${mode} ${sequence}\nDescription: Original armored Rider concept at ${location}, ${aesthetic}.\nCast: ${heroes.map(h => `${name(h)} (${h.riderRole})`).join(', ')}\nKeywords: kamen rider inspired, tokusatsu, armored hero, transformation driver, ${mode.toLowerCase()}, practical armor, ${heroes.map(motifName).join(', ')}.\nOriginal fictional characters.`)] }
 }

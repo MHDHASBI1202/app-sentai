@@ -25,6 +25,10 @@ test('all counts, scene modes and sequence modes generate complete Rider product
       assert.equal(new Set(list.map(x => x.id)).size, list.length)
       for (const item of list) assert.doesNotMatch(item.text, /undefined|spandex|SIXTH RANGER|same base helmet|only change color/i)
     }
+    for (const item of outputs.image) {
+      assert.match(item.text, /No text overlays, captions, subtitles/)
+      assert.doesNotMatch(item.text, /each labeled|labeled panels|numbered panels|metallic lettering|Shout "/i)
+    }
     heroes.forEach(h => {
       const reference = outputs.image.find(x => x.id === `hero-${h.id}`)
       for (const detail of [h.riderRole, h.eyes, h.driver, h.riderFinisher, h.weapon, h.form]) assert.ok(reference.text.includes(detail))
@@ -51,4 +55,15 @@ test('series accent inheritance and silent henshin are honored', () => {
   assert.match(text, /focused silence/)
   assert.doesNotMatch(text, /Shout|Henshin!|Ikuti aksen seri/)
   assert.match(text, /Rose gold accent finish/)
+})
+
+test('image storyboards omit spoken dialogue while videos retain custom henshin shouts', () => {
+  for (const sequence of ['Solo', 'Bersama']) {
+    const result = produce(makeFixture(2), 'Henshin', sequence, { shout: 'Shift into high gear!' })
+    for (const image of result.image) assert.ok(!image.text.includes('Shift into high gear!'))
+    assert.ok(result.video.some(video => video.text.includes('Shout "Shift into high gear!"')))
+    const emblem = result.image.find(image => image.id === 'rider-logo')
+    assert.match(emblem.text, /symbol-only series emblem/)
+    assert.match(emblem.text, /without letters or words/)
+  }
 })
