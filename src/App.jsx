@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import BattlePanel from './BattlePanel.jsx'
 import { applyProductionStyle } from './promptStyle'
 import { RIDER_ROLES, RIDER_SERIES, RIDER_SERIES_LABELS, RIDER_ARMORS, RIDER_EYES, RIDER_FINISHERS, RIDER_DEVICES, makeRider, buildRiderOutputs } from './rider'
 import {
@@ -906,7 +907,7 @@ function useProfileState(isRider, sentaiInitial, riderInitial = sentaiInitial) {
   return [profiles[key], (value) => setProfiles(current => ({ ...current, [key]: typeof value === 'function' ? value(current[key]) : value }))]
 }
 
-function App({ initialCategory = 'sentai' }) {
+function ProductionApp({ initialCategory = 'sentai' }) {
   const [category, setCategory] = useState(initialCategory)
   const isRider = category === 'rider'
   const makeCharacter = (i) => isRider ? { ...makeHero(i), ...makeRider(i), motif: 'Insect', submotif: MOTIFS.Insect[i % MOTIFS.Insect.length] } : makeHero(i)
@@ -1256,6 +1257,47 @@ function App({ initialCategory = 'sentai' }) {
       </section>
     </div>
   </main>
+}
+
+const battleCatalog = {
+  locations: LOCATIONS, aesthetics: AESTHETICS.filter(value => value !== 'Super Sentai Pop 2000-an'), motifs: MOTIFS,
+  riderSeries: RIDER_SERIES, sentaiSeries: TEAM_NAME_PRESETS, accents: TEAM_ACCENT_FINISHES.map(([label]) => label),
+  sentaiSuits: TEAM_SUIT_SYSTEMS.map(([label]) => label), devices: DEVICES,
+}
+
+const makeBattleFighter = (index) => ({
+  ...makeHero(index), ...makeRider(index), riderSeries: RIDER_SERIES[0], sentaiSeries: TEAM_NAME_PRESETS[0],
+  suitSystem: TEAM_SUIT_SYSTEMS[0][0], accent: TEAM_ACCENT_FINISHES[0][0], deviceIndex: 0,
+  weapon: index === 0 ? 'Single short sword' : 'Short staff',
+  ...(index === 0 ? { motif: 'Insect', submotif: MOTIFS.Insect[0] } : {}),
+})
+
+export function describeBattleFighter(hero, franchise) {
+  const isRider = franchise === 'rider'
+  const name = isRider ? `Kamen Rider ${hero.riderName.trim() || hero.name}` : hero.name.trim() || 'Sentai Hero'
+  const motif = hero.motif === 'Kustom' ? hero.customMotif.trim() || 'original custom motif' : `${hero.submotif} ${hero.motif}`
+  const accent = isRider && hero.riderAccent !== 'Ikuti aksen seri' ? hero.riderAccent : hero.accent
+  const finish = TEAM_ACCENT_FINISHES.find(([label]) => label === accent)?.[1] || accent
+  const costume = isRider
+    ? `Sculpted practical Rider armor: ${RIDER_ARMORS.find(([label]) => label === hero.armor)?.[1]}. Helmet has ${hero.eyes}, a ${motif} crest, personal jaw guard and antenna shape. ${hero.form}. ${hero.riderRole}. ${RIDER_DEVICES.find(([label]) => label === hero.driver)?.join(': ')}. ${hero.riderDetail}`
+    : `Physical fabric-first Super Sentai suit: ${TEAM_SUIT_SYSTEMS.find(([label]) => label === hero.suitSystem)?.[1]}. Helmet: ${helmetCrestShape(hero)}. ${hero.role === 'Sixth Ranger' ? `Sixth Ranger variant: ${sixthStyleDetail(hero.sixthStyle)}. ${['Aksen warna berbeda', 'Armor + aksen unik', 'Kombinasi lengkap'].includes(hero.sixthStyle) ? sixthAccentDetail(hero.sixthAccent) : ''}` : 'Main Team member'}. ${DEVICES[hero.deviceIndex].join(': ')}`
+  const feminine = isRider ? feminineDesignName(hero).replaceAll('spandex', 'flexible armored undersuit').replaceAll('minimal armor', 'articulated armor') : feminineDesignName(hero)
+  return {
+    id: hero.id, franchise, name, weapon: hero.weapon.trim() || 'a compact training sword',
+    description: `${name}, ${isRider ? 'Kamen Rider' : 'Super Sentai'} from ${isRider ? hero.riderSeries : hero.sentaiSeries}. ${hero.age}-year-old ${hero.gender}, ${hero.ethnicity} heritage, ${hero.body} build. ${AURAS[hero.aura][0]} primary color; ${finish}. Coverage: ${hero.coverage}. Motif: ${motif}. ${costume}. ${motifAccentDetail(hero, CHEST_EMBLEM_OPTIONS[0])}${feminine}. Equipment: ${hero.weapon.trim() || 'a compact training sword'}.`,
+  }
+}
+
+function App({ initialCategory = 'sentai', initialWorkspace = 'production', initialMatchup = 'rider-sentai' }) {
+  const [workspace, setWorkspace] = useState(initialWorkspace)
+  const [battleVisited, setBattleVisited] = useState(initialWorkspace === 'battle')
+  return <>
+    <nav className="workspace-switch" aria-label="Mode produksi">
+      <div className="segmented"><button aria-pressed={workspace === 'production'} className={workspace === 'production' ? 'active' : ''} onClick={() => setWorkspace('production')}>Produksi Hero</button><button aria-pressed={workspace === 'battle'} className={workspace === 'battle' ? 'active' : ''} onClick={() => { setBattleVisited(true); setWorkspace('battle') }}>Pertarungan 1 vs 1</button></div>
+    </nav>
+    <div className="workspace-panel" hidden={workspace !== 'production'}><ProductionApp initialCategory={initialCategory} /></div>
+    {battleVisited && <div className="workspace-panel" hidden={workspace !== 'battle'}><BattlePanel catalog={battleCatalog} makeFighter={makeBattleFighter} describeFighter={describeBattleFighter} HeroCard={HeroCard} SelectField={SelectField} OutputCard={OutputCard} initialMatchup={initialMatchup} /></div>}
+  </>
 }
 
 export default App

@@ -9,7 +9,7 @@ export const NATURAL_MOTION = 'Perform one readable action at a time with plausi
 export function applyProductionStyle(outputs) {
   const style = (items, motion) => items.map(item => {
     const propOnly = /PROP MACRO|LOGO|EMBLEM/.test(item.kind)
-    const sceneEffects = motion || /STORYBOARD|ROLL CALL|LINEUP/.test(item.kind)
+    const sceneEffects = motion || /STORYBOARD|ROLL CALL|LINEUP|BATTLE KEYFRAME/.test(item.kind)
     const surface = propOnly ? 'Photograph only the requested pristine prop or emblem, with clean intact surfaces and no dirt, scratches, rust, weathering or extra people.' : CLEAN_COSTUME
     const effects = propOnly ? '' : sceneEffects ? CONTROLLED_EFFECTS : 'Clear reference photography: unobstructed face and costume, neutral expression, comfortable balanced stance, no aura, particles, smoke or atmospheric effects.'
     return { ...item, text: `${item.text}\n${LIVE_ACTION_REALISM}\n${surface}\n${effects}${motion ? `\n${NATURAL_MOTION}` : ''}` }

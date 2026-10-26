@@ -1,6 +1,13 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap');
 
 :root { font-family: Manrope, Inter, system-ui, sans-serif; color: #e8f0f3; background: #05080d; font-synthesis: none; }
+.workspace-switch { position:sticky; top:0; z-index:12; padding:8px 20px; background:#080f16; border-bottom:1px solid #22353d; }
+.workspace-switch .segmented { max-width:460px; margin:0 auto; }
+.workspace-switch .segmented button { min-height:38px; font-size:12px; }
+.workspace-panel[hidden] { display:none !important; }
+.workspace-panel .topbar { top:55px; }
+.battle-fighter { margin-top:22px; }
+.battle-fighter .settings-grid { margin-bottom:12px; }
 * { box-sizing: border-box; }
 body { margin: 0; min-width: 320px; background: #05080d; }
 button, select, input { font: inherit; }
